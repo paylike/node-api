@@ -1,0 +1,16 @@
+{
+	"name": "paylike",
+	"version": "0.0.1",
+	"browser": {
+		"./request": "./request-browser"
+	},
+	"dependencies": {
+		"object-assign": "^4.0.1",
+		"object-filter": "^1.0.2",
+		"btoa-lite": "^1.0.0",
+		"request": "^2.64.0",
+		"bluebird": "^2.10.1",
+		"qs": "^5.1.0",
+		"readable-stream": "^2.0.2"
+	}
+}
