@@ -1,16 +1,31 @@
 {
 	"name": "paylike",
+	"description": "Paylike API",
 	"version": "0.0.1",
+	"main": "src",
+	"repository": "paylike/api",
+	"scripts": {
+		"test": "node test",
+		"test-browser": "testling"
+	},
 	"browser": {
-		"./request": "./request-browser"
+		"./src/request.js": "./src/request-browser.js"
+	},
+	"testling": {
+		"files": "test/index.js"
 	},
 	"dependencies": {
 		"object-assign": "^4.0.1",
 		"object-filter": "^1.0.2",
 		"btoa-lite": "^1.0.0",
 		"request": "^2.64.0",
-		"bluebird": "^2.10.1",
+		"bluebird": "^2.10.2",
 		"qs": "^5.1.0",
 		"readable-stream": "^2.0.2"
-	}
+	},
+	"devDependencies": {
+		"tape": "^4.2.1",
+		"testling": "^1.7.1"
+	},
+	"license": "MIT"
 }

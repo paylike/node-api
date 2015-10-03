@@ -57,27 +57,31 @@ assign(Cursor.prototype, {
 	},
 
 	toArray: function(){
-		return new Promise(function( rs, rj ){
-			var results = [];
+		var results = [];
 
-			this.stream()
-				.on('data', function( d ){
-					results.push(d);
-				})
+		var stream = this.stream()
+			.on('data', function( d ){
+				results.push(d);
+			});
+
+		return new Promise(function( rs, rj ){
+			stream
 				.on('end', function( err ){
 					if (err)
 						return rj(err);
 
 					return rs(results);
 				})
-				.on('error', rj);
+				.on('error', function( err ){
+					rj(err);
+				});
 		});
 	},
 });
 
 function ServiceStream( service, url, query, start, end, batchSize, name ){
 	stream.Readable.call(this, {
-		readableObjectMode: true,
+		objectMode: true,
 	});
 
 	this._service = service;
@@ -86,23 +90,25 @@ function ServiceStream( service, url, query, start, end, batchSize, name ){
 	this._position = start || 0;
 	this._size = end;
 	this._name = name;
-	this.batchSize = batchSize || 10;
+	this.batchSize = batchSize || 50;
 
 	this._exhausted = false;
-	this._started = false;
 	this._busy = false;
 }
 
-ServiceStream.prototype = Object.create(stream.Readable);
+ServiceStream.prototype = Object.create(stream.Readable.prototype);
 
 assign(ServiceStream.prototype, {
 	_read: function( n ){
 		if (this._busy || this._exhausted)
 			return;
 
-		this._started = true;
 		this._busy = true;
 
+		this.fetch();
+	},
+
+	fetch: function(){
 		var that = this;
 
 		this._service.request('GET', this._url, assign({}, this._query, {
@@ -111,15 +117,18 @@ assign(ServiceStream.prototype, {
 		})).then(function( r ){
 			var data = r[that._name];
 			var length = data.length;
+			var thirsty = false;
 
 			for (var i = 0;i < length;i++)
-				that.push(data[i]);
+				thirsty = that.push(data[i]);
 
 			that._position += data.length;
 
-			if (length < that.batchSize || this._position === this._size) {
+			if (length < that.batchSize || that._position === that._size) {
 				that._exhausted = true;
 				that.push(null);
+			} else if (thirsty) {
+				that.fetch();
 			}
 		}, function( err ){
 			that.emit('error', err);

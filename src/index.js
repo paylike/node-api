@@ -14,23 +14,25 @@ function Paylike( key, opts ){
 		return new Paylike(key, opts);
 
 	this.key = key;
-	this.api = opts.api || 'https://midgard.paylike.io';
+	this.url = opts && opts.api || 'https://midgard.paylike.io';
 }
 
 assign(Paylike.prototype, {
-	HttpError: request.HttpError,
+	Cursor: Cursor,
+	Error: PaylikeError,
+	AuthorizationError: AuthorizationError,
+	PermissionsError: PermissionsError,
+	NotFoundError: NotFoundError,
+	ValidationError: ValidationError,
 
 	// https://github.com/paylike/api-docs#fetch-current-app
-	findApp: function( appPk ){
-		return this.request('GET', appPk
-			? '/identities/'+appPk
-			: '/me'
-		).then(getIdentity);
+	findApp: function(){
+		return this.request('GET', '/me').then(getIdentity);
 	},
 
 	// https://github.com/paylike/api-docs#create-a-merchant
 	createMerchant: function( opts ){
-		return this.request('POST', '/merchants', filter(opts, isDefined)).then(getMerchantPk);
+		return this.request('POST', '/merchants', opts && filter(opts, isDefined)).then(getMerchantPk);
 	},
 
 	// https://github.com/paylike/api-docs#invite-user-to-a-merchant
@@ -55,10 +57,10 @@ assign(Paylike.prototype, {
 
 	// https://github.com/paylike/api-docs#create-a-transaction
 	createTransaction: function( merchantPk, opts ){
-		if (!opts.cardPk && !opts.transactionPk)
+		if (opts && !opts.cardPk && !opts.transactionPk)
 			throw new Error('Missing either a card pk or a transaction pk');
 
-		return this.request('POST', '/merchants/'+merchantPk+'/transactions', filter(opts, isDefined)).then(getTransactionPk);
+		return this.request('POST', '/merchants/'+merchantPk+'/transactions', opts && filter(opts, isDefined)).then(getTransactionPk);
 	},
 
 	// https://github.com/paylike/api-docs#capture-a-transaction
@@ -109,7 +111,26 @@ assign(Paylike.prototype, {
 	request: function( verb, path, query ){
 		return request(verb, this.url+path, query, {
 			'Authorization': 'Basic ' + btoa(':'+this.key),
-		});
+		})
+			.catch(request.response.ClientError, function( e ){
+				if (e.code === 401)
+					throw new AuthorizationError(e.message);
+
+				if (e.code === 403)
+					throw new PermissionsError(e.message);
+
+				if (e.code === 404)
+					throw new NotFoundError(e.message);
+
+				if (e.code === 400)
+					throw new ValidationError(e.message, e.body);
+
+				throw e;
+			})
+			.catch(request.response.Error, function( e ){
+				throw new PaylikeError(e.message);
+			})
+			.get('body');
 	},
 });
 
@@ -118,7 +139,7 @@ function isDefined( x ){
 }
 
 function getIdentity( o ){
-	retrun o.identity;
+	return o.identity;
 }
 
 function getMerchantPk( o ){
@@ -144,3 +165,27 @@ function getCardPk( o ){
 function returnNothing(){
 	return;
 }
+
+
+function PaylikeError( message ){
+	this.message = message;
+}
+
+PaylikeError.prototype = Object.create(Error.prototype);
+PaylikeError.prototype.toString = function(){ return this.message; };
+
+function AuthorizationError( message ){ this.message = message; }
+AuthorizationError.prototype = Object.create(PaylikeError.prototype);
+
+function PermissionsError( message ){ this.message = message; }
+PermissionsError.prototype = Object.create(PaylikeError.prototype);
+
+function NotFoundError( message ){ this.message = message; }
+NotFoundError.prototype = Object.create(PaylikeError.prototype);
+
+function ValidationError( message, data ){
+	this.message = message;
+	this.data = data;
+}
+
+ValidationError.prototype = Object.create(PaylikeError.prototype);
