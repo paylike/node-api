@@ -56,7 +56,7 @@ assign(Cursor.prototype, {
 		, this._streamBatchSize, this._name);
 	},
 
-	toArray: function(){
+	toArray: function( cb ){
 		var results = [];
 
 		var stream = this.stream()
@@ -75,7 +75,8 @@ assign(Cursor.prototype, {
 				.on('error', function( err ){
 					rj(err);
 				});
-		});
+		})
+			.nodeify(cb);
 	},
 });
 

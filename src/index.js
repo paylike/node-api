@@ -26,20 +26,26 @@ assign(Paylike.prototype, {
 	ValidationError: ValidationError,
 
 	// https://github.com/paylike/api-docs#fetch-current-app
-	findApp: function(){
-		return this.request('GET', '/me').then(getIdentity);
+	findApp: function( cb ){
+		return this.request('GET', '/me')
+			.then(getIdentity)
+			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#create-a-merchant
-	createMerchant: function( opts ){
-		return this.request('POST', '/merchants', opts && filter(opts, isDefined)).then(getMerchantPk);
+	createMerchant: function( opts, cb ){
+		return this.request('POST', '/merchants', opts && filter(opts, isDefined))
+			.then(getMerchantPk)
+			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#invite-user-to-a-merchant
-	invite: function( merchantPk, email ){
+	invite: function( merchantPk, email, cb ){
 		return this.request('POST', '/merchants/'+merchantPk+'/invite', {
 			email: email,
-		}).then(returnNothing);
+		})
+			.then(returnNothing)
+			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#fetch-all-merchants
@@ -51,40 +57,50 @@ assign(Paylike.prototype, {
 	},
 
 	//  https://github.com/paylike/api-docs#fetch-a-merchant
-	findMerchant: function( merchantPk ){
-		return this.request('GET', '/merchants/'+merchantPk).then(getMerchant);
+	findMerchant: function( merchantPk, cb ){
+		return this.request('GET', '/merchants/'+merchantPk)
+			.then(getMerchant)
+			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#create-a-transaction
-	createTransaction: function( merchantPk, opts ){
+	createTransaction: function( merchantPk, opts, cb ){
 		if (opts && !opts.cardPk && !opts.transactionPk)
 			throw new Error('Missing either a card pk or a transaction pk');
 
-		return this.request('POST', '/merchants/'+merchantPk+'/transactions', opts && filter(opts, isDefined)).then(getTransactionPk);
+		return this.request('POST', '/merchants/'+merchantPk+'/transactions', opts && filter(opts, isDefined))
+			.then(getTransactionPk)
+			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#capture-a-transaction
-	capture: function( transactionPk, amount, opts ){
+	capture: function( transactionPk, opts, cb ){
 		return this.request('POST', '/transactions/'+transactionPk+'/captures', filter({
-			amount: amount,
+			amount: opts.amount,
 			currency: opts.currency,
 			descriptor: opts.descriptor,
-		}, isDefined)).then(returnNothing);
+		}, isDefined))
+			.then(returnNothing)
+			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#refund-a-transaction
-	refund: function( transactionPk, amount, opts ){
+	refund: function( transactionPk, opts, cb ){
 		return this.request('POST', '/transactions/'+transactionPk+'/refunds', filter({
-			amount: amount,
+			amount: opts.amount,
 			descriptor: opts.descriptor,
-		}, isDefined)).then(returnNothing);
+		}, isDefined))
+			.then(returnNothing)
+			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#void-a-transaction
-	void: function( transactionPk, amount ){
+	void: function( transactionPk, opts, cb ){
 		return this.request('POST', '/transactions/'+transactionPk+'/refunds', filter({
-			amount: amount,
-		}, isDefined)).then(returnNothing);
+			amount: opts.amount,
+		}, isDefined))
+			.then(returnNothing)
+			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#fetch-all-transactions
@@ -96,19 +112,23 @@ assign(Paylike.prototype, {
 	},
 
 	// https://github.com/paylike/api-docs#fetch-a-transaction
-	findTransaction: function( transactionPk ){
-		return this.request('GET', '/transactions/'+transactionPk).then(getTransaction);
+	findTransaction: function( transactionPk, cb ){
+		return this.request('GET', '/transactions/'+transactionPk)
+			.then(getTransaction)
+			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#save-a-card
-	saveCard: function( merchantPk, transactionPk, opts ){
+	saveCard: function( merchantPk, opts, cb ){
 		return this.request('POST', '/merchants/'+merchantPk+'/cards', filter({
 			transactionPk: opts.transactionPk,
 			notes: opts.notes,
-		}, isDefined)).then(getCardPk);
+		}, isDefined))
+			.then(getCardPk)
+			.nodeify(cb);
 	},
 
-	request: function( verb, path, query ){
+	request: function( verb, path, query, cb ){
 		return request(verb, this.url+path, query, {
 			'Authorization': 'Basic ' + btoa(':'+this.key),
 		})
@@ -130,7 +150,8 @@ assign(Paylike.prototype, {
 			.catch(request.response.Error, function( e ){
 				throw new PaylikeError(e.message);
 			})
-			.get('body');
+			.get('body')
+			.nodeify(cb);
 	},
 });
 
