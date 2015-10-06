@@ -24,7 +24,10 @@ var paylike = require('paylike')(appKey);
 
 All asynchronous methods will return [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) or accept a callback as the last argument (node style).
 
+The Promise implementation is [Bluebird](https://github.com/petkaantonov/bluebird) and you can utilize all of [their API](https://github.com/petkaantonov/bluebird/blob/master/API.md).
+
 ```js
+// Promise style
 paylike.capture(transactionPkA, {
 	amount: 100,
 })
@@ -34,6 +37,7 @@ paylike.capture(transactionPkA, {
 		// capture failed
 	});
 
+// Callback style
 paylike.refund(transactionPkB, {
 	amount: 100,
 }, function( err ){
