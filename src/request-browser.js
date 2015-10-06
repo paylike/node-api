@@ -19,7 +19,7 @@ module.exports = xhr;
 
 var withoutBody = [ 'GET', 'DELETE' ];
 
-function xhr( verb, url, query, headers, cb ){
+function xhr( verb, url, query, headers ){
 	return new Promise(function( rs, rj ){
 		var r = new XMLHttpRequest();
 
