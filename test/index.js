@@ -30,7 +30,7 @@ test('find app', function( t ){
 		});
 });
 
-test.only('merchants', function( t ){
+test('merchants', function( t ){
 	var merchants = paylike.merchants;
 
 	t.test('find one', function( t ){
@@ -279,6 +279,25 @@ test('transactions', function( t ){
 				t.equal(transaction.trail.length, 1, 'length of trail');
 				t.equal(transaction.trail[0].void, true, 'type of trail');
 				t.equal(transaction.trail[0].amount, 260, 'amount in refund trail');
+			});
+	});
+});
+
+test('cards', function( t ){
+	var cards = paylike.cards;
+
+	t.test('create', function( t ){
+		t.plan(1);
+
+		cards
+			.create(merchantPk, {
+				transactionPk: transactionPk,
+			})
+			.then(function( pk ){
+				t.equal(typeof pk, 'string', 'returned primary key');
+			})
+			.catch(function(){
+				t.fail();
 			});
 	});
 });

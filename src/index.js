@@ -8,6 +8,7 @@ var Cursor = require('./cursor');
 
 var Transactions = require('./transactions');
 var Merchants = require('./merchants');
+var Cards = require('./cards');
 
 module.exports = Paylike;
 
@@ -19,6 +20,7 @@ function Paylike( key, opts ){
 
 	this.transactions = new Transactions(this.service);
 	this.merchants = new Merchants(this.service);
+	this.cards = new Cards(this.service);
 }
 
 var errors = {
@@ -39,24 +41,10 @@ assign(Paylike.prototype, {
 			.then(getIdentity)
 			.nodeify(cb);
 	},
-
-	// https://github.com/paylike/api-docs#save-a-card
-	saveCard: function( merchantPk, opts, cb ){
-		return this.service.request('POST', '/merchants/'+merchantPk+'/cards', {
-			transactionPk: opts.transactionPk,
-			notes: opts.notes,
-		})
-			.then(getCardPk)
-			.nodeify(cb);
-	},
 });
 
 function getIdentity( o ){
 	return o.identity;
-}
-
-function getCardPk( o ){
-	return o.card.pk;
 }
 
 function Service( url, key ){
