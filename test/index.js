@@ -20,14 +20,18 @@ var merchantAttributes = {
 	test: true,
 };
 
-test('find app', function( t ){
-	t.plan(1);
+test('apps', function( t ){
+	var apps = paylike.apps;
 
-	paylike
-		.findApp()
-		.tap(function( app ){
-			t.equal(app.pk, appPk, 'app pk');
-		});
+	t.test('find one', function( t ){
+		t.plan(1);
+
+		apps
+			.findOne()
+			.tap(function( app ){
+				t.equal(app.pk, appPk, 'app pk');
+			});
+	});
 });
 
 test('merchants', function( t ){

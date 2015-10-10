@@ -9,6 +9,7 @@ var Cursor = require('./cursor');
 var Transactions = require('./transactions');
 var Merchants = require('./merchants');
 var Cards = require('./cards');
+var Apps = require('./apps');
 
 module.exports = Paylike;
 
@@ -21,6 +22,7 @@ function Paylike( key, opts ){
 	this.transactions = new Transactions(this.service);
 	this.merchants = new Merchants(this.service);
 	this.cards = new Cards(this.service);
+	this.apps = new Apps(this.service);
 }
 
 var errors = {
@@ -33,19 +35,6 @@ var errors = {
 
 assign(Paylike, errors);
 assign(Paylike.prototype, errors);
-
-assign(Paylike.prototype, {
-	// https://github.com/paylike/api-docs#fetch-current-app
-	findApp: function( cb ){
-		return this.service.request('GET', '/me')
-			.then(getIdentity)
-			.nodeify(cb);
-	},
-});
-
-function getIdentity( o ){
-	return o.identity;
-}
 
 function Service( url, key ){
 	this.url = url;
