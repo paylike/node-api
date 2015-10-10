@@ -86,7 +86,6 @@ apps.findOne() -> Promise(App)
 
 merchants.create(opts) -> Promise(pk)
 merchants.invite(email) -> Promise
-
 merchants.find(appPk) -> Cursor
 merchants.findOne(merchantPk) -> Promise(Merchant)
 
