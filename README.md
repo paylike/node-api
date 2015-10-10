@@ -84,19 +84,28 @@ and logging `PaylikeError` would suffice.
 ```
 apps.findOne() -> Promise(app)
 
-merchants.create(opts) -> Promise(pk)
-merchants.invite(email) -> Promise
+merchants.create(opts) -> Promise(merchantPk)
+merchants.invite(merchantPk, email) -> Promise
 merchants.find(appPk) -> Cursor
 merchants.findOne(merchantPk) -> Promise(merchant)
 
-transactions.create(merchantPk, opts) -> Promise(pk)
+transactions.create(merchantPk, opts) -> Promise(transactionPk)
 transactions.capture(transactionPk, opts) -> Promise
 transactions.refund(transactionPk, opts) -> Promise
 transactions.void(transactionPk, opts) -> Promise
 transactions.find(merchantPk) -> Cursor
 transactions.findOne(transactionPk) -> Promise(transaction)
 
-cards.create(merchantPk, opts) -> pk
+cards.create(merchantPk, opts) -> Promise(cardPk)
+
+// Cursor
+
+filter -> cursor
+sort -> cursor
+skip -> cursor
+limit -> cursor
+stream -> stream
+toArray -> Promise(Array)
 ```
 
 A webshop would typically need only `capture`, `refund` and `void`. Some might
