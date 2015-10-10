@@ -82,19 +82,19 @@ and logging `PaylikeError` would suffice.
 ## Methods
 
 ```
-apps.findOne() -> Promise(App)
+apps.findOne() -> Promise(app)
 
 merchants.create(opts) -> Promise(pk)
 merchants.invite(email) -> Promise
 merchants.find(appPk) -> Cursor
-merchants.findOne(merchantPk) -> Promise(Merchant)
+merchants.findOne(merchantPk) -> Promise(merchant)
 
 transactions.create(merchantPk, opts) -> Promise(pk)
 transactions.capture(transactionPk, opts) -> Promise
 transactions.refund(transactionPk, opts) -> Promise
 transactions.void(transactionPk, opts) -> Promise
 transactions.find(merchantPk) -> Cursor
-transactions.findOne(transactionPk) -> Promise(Transaction)
+transactions.findOne(transactionPk) -> Promise(transaction)
 
 cards.create(merchantPk, opts) -> pk
 ```
