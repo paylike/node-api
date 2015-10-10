@@ -28,7 +28,7 @@ The Promise implementation is [Bluebird](https://github.com/petkaantonov/bluebir
 
 ```js
 // Promise style
-paylike.capture(transactionPkA, {
+paylike.transactions.capture(transactionPkA, {
 	amount: 100,
 })
 	.then(function(){
@@ -38,7 +38,7 @@ paylike.capture(transactionPkA, {
 	});
 
 // Callback style
-paylike.refund(transactionPkB, {
+paylike.transactions.refund(transactionPkB, {
 	amount: 100,
 }, function( err ){
 	if (err)
@@ -58,7 +58,7 @@ The API will throw errors when things do not fly. All errors inherit from
 `PaylikeError`. A very verbose example of catching all types of errors:
 
 ```js
-paylike.capture(transactionPk, {
+paylike.transactions.capture(transactionPk, {
 	amount: 100,
 	currency: 'EUR',
 })
@@ -82,18 +82,22 @@ and logging `PaylikeError` would suffice.
 ## Methods
 
 ```
-findApp() -> Promise(App)
-createMerchant(opts) -> Promise(pk)
-invite(email) -> Promise
-findMerchants(appPk) -> Cursor
-findMerchant(merchantPk) -> Promise(Merchant)
-createTransaction(merchantPk, opts) -> Promise(pk)
-capture(transactionPk, opts) -> Promise
-refund(transactionPk, opts) -> Promise
-void(transactionPk, opts) -> Promise
-findTransactions(merchantPk) -> Cursor
-findTransaction(transactionPk) -> Promise(Transaction)
-saveCard(merchantPk, opts) -> pk
+apps.findOne() -> Promise(App)
+
+merchants.create(opts) -> Promise(pk)
+merchants.invite(email) -> Promise
+
+merchants.find(appPk) -> Cursor
+merchants.findOne(merchantPk) -> Promise(Merchant)
+
+transactions.create(merchantPk, opts) -> Promise(pk)
+transactions.capture(transactionPk, opts) -> Promise
+transactions.refund(transactionPk, opts) -> Promise
+transactions.void(transactionPk, opts) -> Promise
+transactions.find(merchantPk) -> Cursor
+transactions.findOne(transactionPk) -> Promise(Transaction)
+
+cards.create(merchantPk, opts) -> pk
 ```
 
 A webshop would typically need only `capture`, `refund` and `void`. Some might
@@ -103,7 +107,7 @@ as well use `findTransaction` and for recurring subscriptions
 ### Example (capturing a transaction)
 
 ```js
-paylike.capture(transactionPk, {
+paylike.transactions.capture(transactionPk, {
 	amount: 1200,
 	currency: 'USD',
 	descriptor: 'Awesome #5011',
