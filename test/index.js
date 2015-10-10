@@ -26,7 +26,7 @@ test('find app', function( t ){
 	paylike
 		.findApp()
 		.tap(function( app ){
-			t.ok(app.pk, 'app pk');
+			t.equal(app.pk, appPk, 'app pk');
 		});
 });
 
@@ -66,7 +66,7 @@ test('invite to merchant', function( t ){
 			return paylike.invite(merchantPk, 'john@example.com');
 		})
 		.then(function( r ){
-			t.equal(typeof r, 'undefined', 'returned value when inviting');
+			t.equal(typeof r, 'undefined', 'returned value');
 		})
 		.catch(function(){
 			t.fail('should not throw');
