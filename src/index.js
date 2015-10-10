@@ -7,6 +7,7 @@ var request = require('./request');
 var Cursor = require('./cursor');
 
 var Transactions = require('./transactions');
+var Merchants = require('./merchants');
 
 module.exports = Paylike;
 
@@ -17,6 +18,7 @@ function Paylike( key, opts ){
 	this.service = new Service(opts && opts.api || 'https://midgard.paylike.io', key || (opts && opts.key));
 
 	this.transactions = new Transactions(this.service);
+	this.merchants = new Merchants(this.service);
 }
 
 var errors = {
@@ -38,37 +40,6 @@ assign(Paylike.prototype, {
 			.nodeify(cb);
 	},
 
-	// https://github.com/paylike/api-docs#create-a-merchant
-	createMerchant: function( opts, cb ){
-		return this.service.request('POST', '/merchants', opts)
-			.then(getMerchantPk)
-			.nodeify(cb);
-	},
-
-	// https://github.com/paylike/api-docs#invite-user-to-a-merchant
-	invite: function( merchantPk, email, cb ){
-		return this.service.request('POST', '/merchants/'+merchantPk+'/invite', {
-			email: email,
-		})
-			.return()
-			.nodeify(cb);
-	},
-
-	// https://github.com/paylike/api-docs#fetch-all-merchants
-	findMerchants: function( identityPk ){
-		return new Cursor(this.service, identityPk
-			? '/identities/'+identityPk+'/merchants'
-			: '/merchants'
-		, 'merchants');
-	},
-
-	//  https://github.com/paylike/api-docs#fetch-a-merchant
-	findMerchant: function( merchantPk, cb ){
-		return this.service.request('GET', '/merchants/'+merchantPk)
-			.then(getMerchant)
-			.nodeify(cb);
-	},
-
 	// https://github.com/paylike/api-docs#save-a-card
 	saveCard: function( merchantPk, opts, cb ){
 		return this.service.request('POST', '/merchants/'+merchantPk+'/cards', {
@@ -82,14 +53,6 @@ assign(Paylike.prototype, {
 
 function getIdentity( o ){
 	return o.identity;
-}
-
-function getMerchantPk( o ){
-	return o.merchant.pk;
-}
-
-function getMerchant( o ){
-	return o.merchant;
 }
 
 function getCardPk( o ){

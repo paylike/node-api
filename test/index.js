@@ -30,76 +30,89 @@ test('find app', function( t ){
 		});
 });
 
-test('create a merchant', function( t ){
-	t.test('validation error', function( t ){
-		t.plan(2);
+test.only('merchants', function( t ){
+	var merchants = paylike.merchants;
 
-		paylike
-			.createMerchant()
-			.tap(function(){
-				t.fail();
-			})
-			.catch(paylike.ValidationError, function( e ){
-				t.ok(e.message, 'message');
-				t.ok(Array.isArray(e.data), 'array of data');
-			});
-	});
-
-	t.test(function( t ){
+	t.test('find one', function( t ){
 		t.plan(1);
 
-		paylike
-			.createMerchant(merchantAttributes)
-			.tap(function( pk ){
-				t.equal(typeof pk, 'string', 'merchant pk');
+		merchants
+			.findOne(merchantPk)
+			.then(function( merchant ){
+				t.equal(merchant.pk, merchantPk, 'primary key');
 			});
 	});
-});
 
-test('invite to merchant', function( t ){
-	t.plan(1);
+	t.test('find', function( t ){
+		t.plan(3);
 
-	var merchantPk = paylike.createMerchant(merchantAttributes);
+		var cursor = merchants.find(appPk);
 
-	merchantPk
-		.then(function( merchantPk ){
-			return paylike.invite(merchantPk, 'john@example.com');
-		})
-		.then(function( r ){
-			t.equal(typeof r, 'undefined', 'returned value');
-		})
-		.catch(function(){
-			t.fail('should not throw');
+		var all = cursor
+			.limit(10)
+			.toArray();
+
+		all.then(function( merchants ){
+			t.ok(Array.isArray(merchants), 'toArray gives an array');
 		});
-});
 
-test('find merchants', function( t ){
-	t.plan(3);
+		var selection = merchants
+			.find(appPk)
+			.filter({ test: true })
+			.skip(2)
+			.limit(2)
+			.toArray();
 
-	var cursor = paylike.findMerchants(appPk);
+		Promise
+			.join(all, selection)
+			.spread(function( merchants, selection ){
+				t.equal(selection.length, 2);
 
-	var all = cursor
-		.limit(10)
-		.toArray();
-
-	all.then(function( merchants ){
-		t.ok(Array.isArray(merchants), 'toArray gives an array');
+				t.deepEqual(selection, merchants.splice(2, 2));
+			});
 	});
 
-	var selection = paylike
-		.findMerchants(appPk)
-		.filter({ test: true })
-		.skip(2)
-		.limit(2)
-		.toArray();
+	t.test('create', function( t ){
+		t.test('validation error', function( t ){
+			t.plan(2);
 
-	Promise
-		.join(all, selection)
-		.spread(function( merchants, selection ){
-			t.equal(selection.length, 2);
-
-			t.deepEqual(selection, merchants.splice(2, 2));
+			merchants
+				.create()
+				.tap(function(){
+					t.fail();
+				})
+				.catch(paylike.ValidationError, function( e ){
+					t.ok(e.message, 'message');
+					t.ok(Array.isArray(e.data), 'array of data');
+				});
 		});
+
+		t.test(function( t ){
+			t.plan(1);
+
+			merchants
+				.create(merchantAttributes)
+				.tap(function( pk ){
+					t.equal(typeof pk, 'string', 'merchant pk');
+				});
+		});
+	});
+
+	t.test('invite', function( t ){
+		t.plan(1);
+
+		merchants
+			.create(merchantAttributes)
+			.then(function( merchantPk ){
+				return merchants.invite(merchantPk, 'john@example.com');
+			})
+			.then(function( r ){
+				t.equal(typeof r, 'undefined', 'returned value');
+			})
+			.catch(function(){
+				t.fail('should not throw');
+			});
+	});
 });
 
 test('transactions', function( t ){
@@ -112,7 +125,7 @@ test('transactions', function( t ){
 			.findOne(transactionPk)
 			.then(function( transaction ){
 				t.equal(transaction.pk, transactionPk, 'primary key');
-				t.ok(Array.isArray(transaction.trail), 'trail is an array')
+				t.ok(Array.isArray(transaction.trail), 'trail is an array');
 			});
 	});
 
