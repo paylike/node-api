@@ -1,11 +1,12 @@
 'use strict';
 
 var assign = require('object-assign');
-var filter = require('object-filter');
 var btoa = require('btoa-lite');
 
 var request = require('./request');
 var Cursor = require('./cursor');
+
+var Transactions = require('./transactions');
 
 module.exports = Paylike;
 
@@ -13,44 +14,49 @@ function Paylike( key, opts ){
 	if (!(this instanceof Paylike))
 		return new Paylike(key, opts);
 
-	this.key = key;
-	this.url = opts && opts.api || 'https://midgard.paylike.io';
+	this.service = new Service(opts && opts.api || 'https://midgard.paylike.io', key || (opts && opts.key));
+
+	this.transactions = new Transactions(this.service);
 }
 
-assign(Paylike.prototype, {
-	Cursor: Cursor,
+var errors = {
 	Error: PaylikeError,
 	AuthorizationError: AuthorizationError,
 	PermissionsError: PermissionsError,
 	NotFoundError: NotFoundError,
 	ValidationError: ValidationError,
+};
 
+assign(Paylike, errors);
+assign(Paylike.prototype, errors);
+
+assign(Paylike.prototype, {
 	// https://github.com/paylike/api-docs#fetch-current-app
 	findApp: function( cb ){
-		return this.request('GET', '/me')
+		return this.service.request('GET', '/me')
 			.then(getIdentity)
 			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#create-a-merchant
 	createMerchant: function( opts, cb ){
-		return this.request('POST', '/merchants', opts && filter(opts, isDefined))
+		return this.service.request('POST', '/merchants', opts)
 			.then(getMerchantPk)
 			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#invite-user-to-a-merchant
 	invite: function( merchantPk, email, cb ){
-		return this.request('POST', '/merchants/'+merchantPk+'/invite', {
+		return this.service.request('POST', '/merchants/'+merchantPk+'/invite', {
 			email: email,
 		})
-			.then(returnNothing)
+			.return()
 			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#fetch-all-merchants
 	findMerchants: function( identityPk ){
-		return new Cursor(this, identityPk
+		return new Cursor(this.service, identityPk
 			? '/identities/'+identityPk+'/merchants'
 			: '/merchants'
 		, 'merchants');
@@ -58,75 +64,45 @@ assign(Paylike.prototype, {
 
 	//  https://github.com/paylike/api-docs#fetch-a-merchant
 	findMerchant: function( merchantPk, cb ){
-		return this.request('GET', '/merchants/'+merchantPk)
+		return this.service.request('GET', '/merchants/'+merchantPk)
 			.then(getMerchant)
-			.nodeify(cb);
-	},
-
-	// https://github.com/paylike/api-docs#create-a-transaction
-	createTransaction: function( merchantPk, opts, cb ){
-		if (opts && !opts.cardPk && !opts.transactionPk)
-			throw new Error('Missing either a card pk or a transaction pk');
-
-		return this.request('POST', '/merchants/'+merchantPk+'/transactions', opts && filter(opts, isDefined))
-			.then(getTransactionPk)
-			.nodeify(cb);
-	},
-
-	// https://github.com/paylike/api-docs#capture-a-transaction
-	capture: function( transactionPk, opts, cb ){
-		return this.request('POST', '/transactions/'+transactionPk+'/captures', filter({
-			amount: opts.amount,
-			currency: opts.currency,
-			descriptor: opts.descriptor,
-		}, isDefined))
-			.then(returnNothing)
-			.nodeify(cb);
-	},
-
-	// https://github.com/paylike/api-docs#refund-a-transaction
-	refund: function( transactionPk, opts, cb ){
-		return this.request('POST', '/transactions/'+transactionPk+'/refunds', filter({
-			amount: opts.amount,
-			descriptor: opts.descriptor,
-		}, isDefined))
-			.then(returnNothing)
-			.nodeify(cb);
-	},
-
-	// https://github.com/paylike/api-docs#void-a-transaction
-	void: function( transactionPk, opts, cb ){
-		return this.request('POST', '/transactions/'+transactionPk+'/refunds', filter({
-			amount: opts.amount,
-		}, isDefined))
-			.then(returnNothing)
-			.nodeify(cb);
-	},
-
-	// https://github.com/paylike/api-docs#fetch-all-transactions
-	findTransactions: function( merchantPk ){
-		return new Cursor(this, merchantPk
-			? '/merchants/'+merchantPk+'/transactions'
-			: '/transactions'
-		, 'transactions');
-	},
-
-	// https://github.com/paylike/api-docs#fetch-a-transaction
-	findTransaction: function( transactionPk, cb ){
-		return this.request('GET', '/transactions/'+transactionPk)
-			.then(getTransaction)
 			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#save-a-card
 	saveCard: function( merchantPk, opts, cb ){
-		return this.request('POST', '/merchants/'+merchantPk+'/cards', filter({
+		return this.service.request('POST', '/merchants/'+merchantPk+'/cards', {
 			transactionPk: opts.transactionPk,
 			notes: opts.notes,
-		}, isDefined))
+		})
 			.then(getCardPk)
 			.nodeify(cb);
 	},
+});
+
+function getIdentity( o ){
+	return o.identity;
+}
+
+function getMerchantPk( o ){
+	return o.merchant.pk;
+}
+
+function getMerchant( o ){
+	return o.merchant;
+}
+
+function getCardPk( o ){
+	return o.card.pk;
+}
+
+function Service( url, key ){
+	this.url = url;
+	this.key = key;
+}
+
+assign(Service.prototype, {
+	Cursor: Cursor,
 
 	request: function( verb, path, query, cb ){
 		return request(verb, this.url+path, query, {
@@ -154,39 +130,6 @@ assign(Paylike.prototype, {
 			.nodeify(cb);
 	},
 });
-
-function isDefined( x ){
-	return x !== undefined;
-}
-
-function getIdentity( o ){
-	return o.identity;
-}
-
-function getMerchantPk( o ){
-	return o.merchant.pk;
-}
-
-function getMerchant( o ){
-	return o.merchant;
-}
-
-function getTransaction( o ){
-	return o.transaction;
-}
-
-function getTransactionPk( o ){
-	return o.transaction.pk;
-}
-
-function getCardPk( o ){
-	return o.card.pk;
-}
-
-function returnNothing(){
-	return;
-}
-
 
 function PaylikeError( message ){
 	this.message = message;

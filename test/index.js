@@ -72,11 +72,9 @@ test('invite to merchant', function( t ){
 });
 
 test('find merchants', function( t ){
-	t.plan(4);
+	t.plan(3);
 
 	var cursor = paylike.findMerchants(appPk);
-
-	t.ok(cursor instanceof paylike.Cursor, 'returned a cursor');
 
 	var all = cursor
 		.limit(10)
