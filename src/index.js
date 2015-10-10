@@ -17,12 +17,12 @@ function Paylike( key, opts ){
 	if (!(this instanceof Paylike))
 		return new Paylike(key, opts);
 
-	this.service = new Service(opts && opts.api || 'https://midgard.paylike.io', key || (opts && opts.key));
+	var service = new Service(opts && opts.api || 'https://midgard.paylike.io', key || (opts && opts.key));
 
-	this.transactions = new Transactions(this.service);
-	this.merchants = new Merchants(this.service);
-	this.cards = new Cards(this.service);
-	this.apps = new Apps(this.service);
+	this.transactions = new Transactions(service);
+	this.merchants = new Merchants(service);
+	this.cards = new Cards(service);
+	this.apps = new Apps(service);
 }
 
 var errors = {
