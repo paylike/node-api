@@ -7,6 +7,17 @@ var paylike = require('../')('a2cca60d-d25e-407e-9177-a18ef6cfdc71');
 
 var appPk = '560e4ae122146ace420c9ef8';
 
+var merchantAttributes = {
+	company: {
+		country: 'DK',
+	},
+	currency: 'DKK',
+	email: 'john@example.com',
+	website: 'https://example.com',
+	descriptor: 'Coffee & John',
+	test: true,
+};
+
 test('find app', function( t ){
 	t.plan(1);
 
@@ -36,20 +47,28 @@ test('create a merchant', function( t ){
 		t.plan(1);
 
 		paylike
-			.createMerchant({
-				company: {
-					country: 'DK',
-				},
-				currency: 'DKK',
-				email: 'john@example.com',
-				website: 'https://example.com',
-				descriptor: 'Coffee & John',
-				test: true,
-			})
+			.createMerchant(merchantAttributes)
 			.tap(function( pk ){
 				t.equal(typeof pk, 'string', 'merchant pk');
 			});
 	});
+});
+
+test('invite to merchant', function( t ){
+	t.plan(1);
+
+	var merchantPk = paylike.createMerchant(merchantAttributes);
+
+	merchantPk
+		.then(function( merchantPk ){
+			return paylike.invite(merchantPk, 'john@example.com');
+		})
+		.then(function( r ){
+			t.equal(typeof r, 'undefined', 'returned value when inviting');
+		})
+		.catch(function(){
+			t.fail('should not throw');
+		});
 });
 
 test('find merchants', function( t ){
