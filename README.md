@@ -1,7 +1,5 @@
 # Paylike client (Node.js)
 
-Manage your Paylike transactions and account easily.
-
 With [browserify](https://github.com/substack/node-browserify/) you can use
 this library in the browser as well. Be aware that you should not bundle your
 private API keys for public websites though.
