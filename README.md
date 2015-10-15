@@ -50,7 +50,23 @@ paylike.transactions.refund(transactionPkB, {
 
 ## Cursors
 
-TODO
+All `find` methods return cursors.
+
+A cursor is simply an object wrapping a result of unknown length. It polls the
+server in batches as needed.
+
+```js
+var cursor = paylike.transactions.find(merchantPk);
+
+// get a promise for an array of 5 items starting after the first 10
+cursor.skip(10).limit(5).toArray();
+
+// stream all transactions to a HTTP response
+paylike.transactions.find(merchantPk)
+	.stream()
+	.pipe(JSONStream.stringify())
+	.pipe(response);
+```
 
 ## Error handling
 
