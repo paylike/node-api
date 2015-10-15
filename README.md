@@ -125,8 +125,8 @@ toArray -> Promise(Array)
 ```
 
 A webshop would typically need only `capture`, `refund` and `void`. Some might
-as well use `findTransaction` and for recurring subscriptions
-`createTransaction`.
+as well use `transactions.findOne` and for recurring subscriptions
+`transactions.create`.
 
 ### Example (capturing a transaction)
 
