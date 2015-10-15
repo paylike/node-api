@@ -9,6 +9,8 @@ Writing your own client? Checkout the raw [HTTP service](https://github.com/payl
 **Make sure to [subscribe to our mailling list](http://eepurl.com/bCGmg1)
 for deprecation notices, API changes and new features**, or you can watch this repository for changes.
 
+*This is a `0.0.x` release, change might come*
+
 ## Getting an API key
 
 An API key can be obtained by creating a merchant and adding an app through our [dashboard](https://app.paylike.io). If your app's target audience is third parties, please reach out and we will make your app's API key hidden.
