@@ -4,6 +4,8 @@ With [browserify](https://github.com/substack/node-browserify/) you can use
 this library in the browser as well. Be aware that you should not bundle your
 private API keys for public websites though.
 
+Writing your own client? Checkout the raw [HTTP service](https://github.com/paylike/api-docs).
+
 ## Getting an API key
 
 An API key can be obtained by creating a merchant and adding an app through our [dashboard](https://app.paylike.io). If your app's target audience is third parties, please reach out and we will make your app's API key hidden.
