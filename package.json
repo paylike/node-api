@@ -3,7 +3,7 @@
 	"description": "Paylike API",
 	"version": "0.0.2",
 	"main": "src",
-	"repository": "paylike/api",
+	"repository": "paylike/node-api",
 	"scripts": {
 		"test": "node test",
 		"test-browser": "testling"
