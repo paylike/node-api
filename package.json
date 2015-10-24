@@ -16,7 +16,6 @@
 	},
 	"dependencies": {
 		"object-assign": "^4.0.1",
-		"object-filter": "^1.0.2",
 		"btoa-lite": "^1.0.0",
 		"request": "^2.64.0",
 		"bluebird": "^2.10.2",
