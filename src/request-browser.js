@@ -3,16 +3,16 @@
 var Promise = require('bluebird');
 var serialize = require('qs/lib/stringify');
 
-var response = require('./request-responses');
+var responses = require('./request-responses');
 
-xhr.response = response;
+xhr.response = responses;
 
 var responseMap = {
-	1: response.Error,
-	2: response.Success,
-	3: response.Error,
-	4: response.ClientError,
-	5: response.ServerError,
+	1: responses.Error,
+	2: responses.Success,
+	3: responses.Error,
+	4: responses.ClientError,
+	5: responses.ServerError,
 };
 
 module.exports = xhr;
@@ -41,7 +41,7 @@ function xhr( verb, url, query, headers ){
 
 			var statusIdentifier = code && (code / 100 | 0);
 
-			var responseType = responseMap[statusIdentifier] || response.Error;
+			var responseType = responseMap[statusIdentifier] || responses.Error;
 
 			var response = new responseType(
 				code,
