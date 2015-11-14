@@ -106,11 +106,19 @@ and logging `PaylikeError` would suffice.
 .setKey(key)
 
 apps.findOne() -> Promise(app)
+apps.create(opts) -> Promise(app)
 
 merchants.create(opts) -> Promise(merchantPk)
-merchants.invite(merchantPk, email) -> Promise
+merchants.update(merchantPk, opts) -> Promise
 merchants.find(appPk) -> Cursor
 merchants.findOne(merchantPk) -> Promise(merchant)
+merchants.users.add(merchantPk, opts) -> Promise
+merchants.users.revoke(merchantPk, userPk) -> Promise
+merchants.users.find(merchantPk) -> Promise(users)
+merchants.apps.add(merchantPk, opts) -> Promise
+merchants.apps.revoke(merchantPk, appPk) -> Promise
+merchants.apps.find(merchantPk) -> Promise(apps)
+merchants.lines.find(merchantPk) -> Promise(lines)
 
 transactions.create(merchantPk, opts) -> Promise(transactionPk)
 transactions.capture(transactionPk, opts) -> Promise

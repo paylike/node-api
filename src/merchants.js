@@ -2,10 +2,18 @@
 
 var assign = require('object-assign');
 
+var Apps = require('./merchants-apps');
+var Users = require('./merchants-users');
+var Lines = require('./merchants-lines');
+
 module.exports = Merchants;
 
 function Merchants( service ){
 	this.service = service;
+
+	this.apps = new Apps(service);
+	this.users = new Users(service);
+	this.lines = new Lines(service);
 }
 
 assign(Merchants.prototype, {
@@ -17,11 +25,9 @@ assign(Merchants.prototype, {
 			.nodeify(cb);
 	},
 
-	// https://github.com/paylike/api-docs#invite-user-to-a-merchant
-	invite: function( merchantPk, email, cb ){
-		return this.service.request('POST', '/merchants/'+merchantPk+'/invite', {
-			email: email,
-		})
+	// https://github.com/paylike/api-docs#update-a-merchant
+	update: function( merchantPk, opts, cb ){
+		return this.service.request('PUT', '/merchants/'+merchantPk, opts)
 			.return()
 			.nodeify(cb);
 	},

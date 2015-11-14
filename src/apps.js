@@ -15,4 +15,11 @@ assign(Apps.prototype, {
 			.get('identity')
 			.nodeify(cb);
 	},
+
+	// https://github.com/paylike/api-docs#create-an-app
+	create: function( opts, cb ){
+		return this.service.request('POST', '/apps', opts)
+			.get('app')
+			.nodeify(cb);
+	},
 })

@@ -23,6 +23,18 @@ var merchantAttributes = {
 test('apps', function( t ){
 	var apps = paylike.apps;
 
+	t.test('create', function( t ){
+		t.plan(1);
+
+		apps
+			.create({
+				name: 'Coffee & John',
+			})
+			.tap(function( app ){
+				t.ok(app, 'app');
+			});
+	});
+
 	t.test('find one', function( t ){
 		t.plan(1);
 
@@ -102,20 +114,163 @@ test('merchants', function( t ){
 		});
 	});
 
-	t.test('invite', function( t ){
+	t.test('update', function( t ){
 		t.plan(1);
 
 		merchants
 			.create(merchantAttributes)
 			.then(function( merchantPk ){
-				return merchants.invite(merchantPk, 'john@example.com');
+				return merchants.update(merchantPk, { name: 'Coffee John' });
 			})
-			.then(function( r ){
+			.tap(function( r ){
 				t.equal(typeof r, 'undefined', 'returned value');
 			})
 			.catch(function(){
 				t.fail('should not throw');
 			});
+	});
+
+	t.test('users', function( t ){
+		t.test('add', function( t ){
+			t.plan(1);
+
+			merchants
+				.create(merchantAttributes)
+				.then(function( merchantPk ){
+					return merchants.users.add(merchantPk, { email: 'one@example.com' });
+				})
+				.tap(function( r ){
+					t.equal(typeof r, 'undefined', 'returned value');
+				})
+				.catch(function(){
+					t.fail('should not throw');
+				});
+		});
+
+		test.test('revoke', function( t ){
+			t.plan(1);
+
+			var merchantPk = merchants.create(merchantAttributes);
+			var added = merchantPk
+				.then(function( merchantPk ){
+					return merchants.users.add(merchantPk, { email: 'two@example.com' });
+				});
+
+			var userPk = Promise
+				.join(merchantPk, added)
+				.spread(function( merchantPk ){
+					return merchants.users.find(merchantPk);
+				})
+				.call('limit')
+				.call('toArray')
+				.get(0)
+				.get('pk');
+
+			Promise
+				.join(merchantPk, userPk)
+				.spread(function( merchantPk, userPk ){
+					return merchants.users.revoke(merchantPk, userPk);
+				})
+				.tap(function( r ){
+					t.equal(typeof r, 'undefined', 'returned value');
+				})
+				.catch(function(){
+					t.fail('should not throw');
+				});
+		});
+
+		t.test('find', function( t ){
+			t.plan(2);
+
+			var merchantPk = merchants.create(merchantAttributes);
+			var added = merchantPk
+				.then(function( merchantPk ){
+					return merchants.users.add(merchantPk, { email: 'two@example.com' });
+				});
+
+			Promise
+				.join(merchantPk, added)
+				.spread(function( merchantPk ){
+					return merchants.users.find(merchantPk);
+				})
+				.call('limit')
+				.call('toArray')
+				.tap(function( users ){
+					t.equal(users.length, 1, 'count');
+					t.ok(users[0].pk, 'a primary key is returned');
+				});
+		});
+	});
+
+	t.test('apps', function( t ){
+		t.test('add', function( t ){
+			t.plan(1);
+
+			merchants
+				.create(merchantAttributes)
+				.then(function( merchantPk ){
+					return merchants.apps.add(merchantPk, { appPk: appPk });
+				})
+				.tap(function( r ){
+					t.equal(typeof r, 'undefined', 'returned value');
+				})
+				.catch(function(){
+					t.fail('should not throw');
+				});
+		});
+
+		t.test('revoke', function( t ){
+			t.plan(1);
+
+			var merchantPk = merchants.create(merchantAttributes);
+			var added = merchantPk.then(function( merchantPk ){
+				return merchants.apps.add(merchantPk, appPk);
+			});
+
+			Promise
+				.join(merchantPk, added)
+				.spread(function( merchantPk ){
+					return merchants.apps.revoke(merchantPk, appPk);
+				})
+				.tap(function( r ){
+					t.equal(typeof r, 'undefined', 'returned value');
+				})
+				.catch(function(){
+					t.fail('should not throw');
+				});
+		});
+
+		t.test('find', function( t ){
+			t.plan(2);
+
+			merchants
+				.create(merchantAttributes)
+				.then(function( merchantPk ){
+					return merchants.apps.find(merchantPk);
+				})
+				.call('limit')
+				.call('toArray')
+				.tap(function( apps ){
+					t.equal(apps.length, 1, 'count');
+					t.ok(apps[0].pk, 'a primary key is returned');
+				});
+		});
+	});
+
+	t.test('lines', function( t ){
+		t.test('find', function( t ){
+			t.plan(2);
+
+			merchants
+				.lines
+				.find(merchantPk)
+				.limit(1)
+				.toArray()
+				.tap(function( lines ){
+					t.equal(lines.length, 1, 'count');
+					t.ok(lines[0].pk, 'a primary key is returned');
+				});
+		});
 	});
 });
 
