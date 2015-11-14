@@ -2,8 +2,8 @@
 
 var assign = require('object-assign');
 var btoa = require('btoa-lite');
+var fetch = require('fetch-one');
 
-var request = require('./request');
 var Cursor = require('./cursor');
 
 var Transactions = require('./transactions');
@@ -45,10 +45,10 @@ assign(Service.prototype, {
 	Cursor: Cursor,
 
 	request: function( verb, path, query, cb ){
-		return request(verb, this.url+path, query, {
+		return fetch(verb, this.url+path, query, {
 			'Authorization': 'Basic ' + btoa(':'+this.key),
 		})
-			.catch(request.response.ClientError, function( e ){
+			.catch(fetch.response.ClientError, function( e ){
 				if (e.code === 401)
 					throw new AuthorizationError(e.message);
 
@@ -63,7 +63,7 @@ assign(Service.prototype, {
 
 				throw e;
 			})
-			.catch(request.response.Error, function( e ){
+			.catch(fetch.response.Error, function( e ){
 				throw new PaylikeError(e.message);
 			})
 			.get('body')
