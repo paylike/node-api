@@ -23,6 +23,10 @@ function Paylike( key, opts ){
 	this.merchants = new Merchants(service);
 	this.cards = new Cards(service);
 	this.apps = new Apps(service);
+
+	this.setKey = function( key ){
+		service.key = key;
+	};
 }
 
 var errors = {

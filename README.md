@@ -103,6 +103,8 @@ and logging `PaylikeError` would suffice.
 ## Methods
 
 ```
+.setKey(key)
+
 apps.findOne() -> Promise(app)
 
 merchants.create(opts) -> Promise(merchantPk)
