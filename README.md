@@ -102,7 +102,7 @@ and logging `PaylikeError` would suffice.
 
 ## Methods
 
-```
+```js
 // change key for authentication
 .setKey(key)
 
