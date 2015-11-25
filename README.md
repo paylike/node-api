@@ -25,6 +25,63 @@ npm install paylike --save
 var paylike = require('paylike')(appKey);
 ```
 
+## Methods
+
+```js
+// change key for authentication
+.setKey(key)
+
+// create an app (requires no authentication)
+apps.create(opts) -> Promise(app)
+
+// fetch current app (based on key)
+apps.findOne() -> Promise(app)
+
+// list app's merchants
+apps.merchants.find(appPk) -> Cursor
+
+
+merchants.create(opts) -> Promise(merchantPk)
+merchants.update(merchantPk, opts) -> Promise
+merchants.findOne(merchantPk) -> Promise(merchant)
+
+merchants.users.add(merchantPk, opts) -> Promise
+merchants.users.revoke(merchantPk, userPk) -> Promise
+merchants.users.find(merchantPk) -> Promise(users)
+
+merchants.apps.add(merchantPk, opts) -> Promise
+merchants.apps.revoke(merchantPk, appPk) -> Promise
+merchants.apps.find(merchantPk) -> Promise(apps)
+
+merchants.lines.find(merchantPk) -> Promise(lines)
+
+merchants.transactions.create(merchantPk, opts) -> Promise(transactionPk)
+merchants.transactions.find(merchantPk) -> Cursor
+
+
+transactions.capture(transactionPk, opts) -> Promise
+transactions.refund(transactionPk, opts) -> Promise
+transactions.void(transactionPk, opts) -> Promise
+transactions.findOne(transactionPk) -> Promise(transaction)
+
+
+cards.create(merchantPk, opts) -> Promise(cardPk)
+
+
+// Cursor
+
+filter -> cursor
+sort -> cursor
+skip -> cursor
+limit -> cursor
+stream -> stream
+toArray -> Promise(Array)
+```
+
+A webshop would typically need only `capture`, `refund` and `void`. Some might
+as well use `transactions.findOne` and for recurring subscriptions
+`transactions.create`.
+
 ## Promises or callbacks (we support both)
 
 All asynchronous methods will return [promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) or accept a callback as the last argument (node style).
@@ -99,63 +156,6 @@ paylike.transactions.capture(transactionPk, {
 
 In most cases catching `NotFoundError` and `ValidationError` as client errors
 and logging `PaylikeError` would suffice.
-
-## Methods
-
-```js
-// change key for authentication
-.setKey(key)
-
-// create an app (requires no authentication)
-apps.create(opts) -> Promise(app)
-
-// fetch current app (based on key)
-apps.findOne() -> Promise(app)
-
-// list app's merchants
-apps.merchants.find(appPk) -> Cursor
-
-
-merchants.create(opts) -> Promise(merchantPk)
-merchants.update(merchantPk, opts) -> Promise
-merchants.findOne(merchantPk) -> Promise(merchant)
-
-merchants.users.add(merchantPk, opts) -> Promise
-merchants.users.revoke(merchantPk, userPk) -> Promise
-merchants.users.find(merchantPk) -> Promise(users)
-
-merchants.apps.add(merchantPk, opts) -> Promise
-merchants.apps.revoke(merchantPk, appPk) -> Promise
-merchants.apps.find(merchantPk) -> Promise(apps)
-
-merchants.lines.find(merchantPk) -> Promise(lines)
-
-merchants.transactions.create(merchantPk, opts) -> Promise(transactionPk)
-merchants.transactions.find(merchantPk) -> Cursor
-
-
-transactions.capture(transactionPk, opts) -> Promise
-transactions.refund(transactionPk, opts) -> Promise
-transactions.void(transactionPk, opts) -> Promise
-transactions.findOne(transactionPk) -> Promise(transaction)
-
-
-cards.create(merchantPk, opts) -> Promise(cardPk)
-
-
-// Cursor
-
-filter -> cursor
-sort -> cursor
-skip -> cursor
-limit -> cursor
-stream -> stream
-toArray -> Promise(Array)
-```
-
-A webshop would typically need only `capture`, `refund` and `void`. Some might
-as well use `transactions.findOne` and for recurring subscriptions
-`transactions.create`.
 
 ### Example (capturing a transaction)
 
