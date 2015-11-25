@@ -103,31 +103,45 @@ and logging `PaylikeError` would suffice.
 ## Methods
 
 ```
+// change key for authentication
 .setKey(key)
 
-apps.findOne() -> Promise(app)
+// create an app (requires no authentication)
 apps.create(opts) -> Promise(app)
+
+// fetch current app (based on key)
+apps.findOne() -> Promise(app)
+
+// list app's merchants
+apps.merchants.find(appPk) -> Cursor
+
 
 merchants.create(opts) -> Promise(merchantPk)
 merchants.update(merchantPk, opts) -> Promise
-merchants.find(appPk) -> Cursor
 merchants.findOne(merchantPk) -> Promise(merchant)
+
 merchants.users.add(merchantPk, opts) -> Promise
 merchants.users.revoke(merchantPk, userPk) -> Promise
 merchants.users.find(merchantPk) -> Promise(users)
+
 merchants.apps.add(merchantPk, opts) -> Promise
 merchants.apps.revoke(merchantPk, appPk) -> Promise
 merchants.apps.find(merchantPk) -> Promise(apps)
+
 merchants.lines.find(merchantPk) -> Promise(lines)
 
-transactions.create(merchantPk, opts) -> Promise(transactionPk)
+merchants.transactions.create(merchantPk, opts) -> Promise(transactionPk)
+merchants.transactions.find(merchantPk) -> Cursor
+
+
 transactions.capture(transactionPk, opts) -> Promise
 transactions.refund(transactionPk, opts) -> Promise
 transactions.void(transactionPk, opts) -> Promise
-transactions.find(merchantPk) -> Cursor
 transactions.findOne(transactionPk) -> Promise(transaction)
 
+
 cards.create(merchantPk, opts) -> Promise(cardPk)
+
 
 // Cursor
 

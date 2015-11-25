@@ -3,6 +3,20 @@
 This project adheres to [Semantic Versioning](http://semver.org/). This change
 log follows the format outlined at http://keepachangelog.com.
 
+## Unreleased
+
+### Added
+
+- `apps.merchants.find`
+- `merchants.transactions.create`
+- `merchants.transactions.find`
+
+### Removed
+
+- `merchants.find` (replaced by `apps.merchants.find`)
+- `transactions.create` (replaced by `merchants.transactions.create`)
+- `transactions.find` (replaced by `merchants.transactions.find`)
+
 ## 0.0.4 - 2015-11-25
 
 ### Added

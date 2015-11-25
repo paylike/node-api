@@ -5,6 +5,7 @@ var assign = require('object-assign');
 var Apps = require('./merchants-apps');
 var Users = require('./merchants-users');
 var Lines = require('./merchants-lines');
+var Transactions = require('./merchants-transactions');
 
 module.exports = Merchants;
 
@@ -14,6 +15,7 @@ function Merchants( service ){
 	this.apps = new Apps(service);
 	this.users = new Users(service);
 	this.lines = new Lines(service);
+	this.transactions = new Transactions(service);
 }
 
 assign(Merchants.prototype, {
@@ -30,14 +32,6 @@ assign(Merchants.prototype, {
 		return this.service.request('PUT', '/merchants/'+merchantPk, opts)
 			.return()
 			.nodeify(cb);
-	},
-
-	// https://github.com/paylike/api-docs#fetch-all-merchants
-	find: function( identityPk ){
-		return new this.service.Cursor(this.service, identityPk
-			? '/identities/'+identityPk+'/merchants'
-			: '/merchants'
-		, 'merchants');
 	},
 
 	//  https://github.com/paylike/api-docs#fetch-a-merchant

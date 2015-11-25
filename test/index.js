@@ -44,6 +44,38 @@ test('apps', function( t ){
 				t.equal(app.pk, appPk, 'app pk');
 			});
 	});
+
+	t.test('merchants', function( t ){
+		t.test('find', function( t ){
+			t.plan(3);
+
+			var cursor = apps.merchants.find(appPk);
+
+			var all = cursor
+				.limit(10)
+				.toArray();
+
+			all.then(function( merchants ){
+				t.ok(Array.isArray(merchants), 'toArray gives an array');
+			});
+
+			var selection = apps
+				.merchants
+				.find(appPk)
+				.filter({ test: true })
+				.skip(2)
+				.limit(2)
+				.toArray();
+
+			Promise
+				.join(all, selection)
+				.spread(function( merchants, selection ){
+					t.equal(selection.length, 2);
+
+					t.deepEqual(selection, merchants.splice(2, 2));
+				});
+		});
+	});
 });
 
 test('merchants', function( t ){
@@ -56,35 +88,6 @@ test('merchants', function( t ){
 			.findOne(merchantPk)
 			.then(function( merchant ){
 				t.equal(merchant.pk, merchantPk, 'primary key');
-			});
-	});
-
-	t.test('find', function( t ){
-		t.plan(3);
-
-		var cursor = merchants.find(appPk);
-
-		var all = cursor
-			.limit(10)
-			.toArray();
-
-		all.then(function( merchants ){
-			t.ok(Array.isArray(merchants), 'toArray gives an array');
-		});
-
-		var selection = merchants
-			.find(appPk)
-			.filter({ test: true })
-			.skip(2)
-			.limit(2)
-			.toArray();
-
-		Promise
-			.join(all, selection)
-			.spread(function( merchants, selection ){
-				t.equal(selection.length, 2);
-
-				t.deepEqual(selection, merchants.splice(2, 2));
 			});
 	});
 
@@ -272,9 +275,45 @@ test('merchants', function( t ){
 				});
 		});
 	});
+
+	t.test('transactions', function( t ){
+		t.test('create', function( t ){
+			t.plan(1)
+
+			merchants
+				.transactions
+				.create(merchantPk, {
+					transactionPk: transactionPk,
+					currency: 'EUR',
+					amount: 200,
+					custom: { source: 'node client test' },
+				})
+				.then(function( pk ){
+					t.equal(typeof pk, 'string', 'returned primary key');
+				})
+				.catch(function(){
+					t.fail();
+				});
+		});
+
+		t.test('find', function( t ){
+			t.plan(2);
+
+			merchants
+				.transactions
+				.find(merchantPk)
+				.limit(3)
+				.toArray()
+				.tap(function( transactions ){
+					t.equal(transactions.length, 3, 'count');
+					t.ok(transactions[0].pk, 'a primary key is returned');
+				});
+		});
+	});
 });
 
 test('transactions', function( t ){
+	var merchants = paylike.merchants;
 	var transactions = paylike.transactions;
 
 	t.test('find one', function( t ){
@@ -288,41 +327,10 @@ test('transactions', function( t ){
 			});
 	});
 
-	t.test('find', function( t ){
-		t.plan(2);
-
-		transactions
-			.find(merchantPk)
-			.limit(3)
-			.toArray()
-			.tap(function( transactions ){
-				t.equal(transactions.length, 3, 'count');
-				t.ok(transactions[0].pk, 'a primary key is returned');
-			});
-	});
-
-	t.test('create', function( t ){
-		t.plan(1)
-
-		transactions
-			.create(merchantPk, {
-				transactionPk: transactionPk,
-				currency: 'EUR',
-				amount: 200,
-				custom: { source: 'node client test' },
-			})
-			.then(function( pk ){
-				t.equal(typeof pk, 'string', 'returned primary key');
-			})
-			.catch(function(){
-				t.fail();
-			});
-	});
-
 	t.test('capture', function( t ){
 		t.plan(6);
 
-		var newTransactionPk = transactions.create(merchantPk, {
+		var newTransactionPk = merchants.transactions.create(merchantPk, {
 			transactionPk: transactionPk,
 			currency: 'EUR',
 			amount: 300,
@@ -360,7 +368,7 @@ test('transactions', function( t ){
 	t.test('refund', function( t ){
 		t.plan(7);
 
-		var newTransactionPk = transactions.create(merchantPk, {
+		var newTransactionPk = merchants.transactions.create(merchantPk, {
 			transactionPk: transactionPk,
 			currency: 'EUR',
 			amount: 300,
@@ -407,7 +415,7 @@ test('transactions', function( t ){
 	t.test('void', function( t ){
 		t.plan(6);
 
-		var newTransactionPk = transactions.create(merchantPk, {
+		var newTransactionPk = merchants.transactions.create(merchantPk, {
 			transactionPk: transactionPk,
 			currency: 'EUR',
 			amount: 300,

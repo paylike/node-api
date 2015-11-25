@@ -2,10 +2,14 @@
 
 var assign = require('object-assign');
 
+var Merchants = require('./apps-merchants');
+
 module.exports = Apps;
 
 function Apps( service ){
 	this.service = service;
+
+	this.merchants = new Merchants(service);
 }
 
 assign(Apps.prototype, {
