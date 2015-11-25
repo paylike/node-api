@@ -5,6 +5,8 @@ log follows the format outlined at http://keepachangelog.com.
 
 ## Unreleased
 
+## 0.0.5 - 2015-11-25
+
 ### Added
 
 - `apps.merchants.find`
