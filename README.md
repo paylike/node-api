@@ -70,10 +70,9 @@ cards.create(merchantPk, opts) -> Promise(cardPk)
 
 // Cursor
 
-filter -> cursor
-sort -> cursor
-skip -> cursor
-limit -> cursor
+after(pk) -> cursor
+before(pk) -> cursor
+limit(limit) -> cursor
 stream -> stream
 toArray -> Promise(Array)
 ```
@@ -117,11 +116,19 @@ All `find` methods return cursors.
 A cursor is simply an object wrapping a result of unknown length. It polls the
 server in batches as needed.
 
+If you specify a starting point using `before()` you will get the newest
+objects first (which is also the default), but using `after` you will receive
+them in reverse order. This fits nicely into the stream pattern and infinite
+lists that expand in both directions.
+
+The rationale for using `after`/`before` as opposed to `skip` is to achieve
+stable lists and reliable data synchronization.
+
 ```js
 var cursor = paylike.transactions.find(merchantPk);
 
-// get a promise for an array of 5 items starting after the first 10
-cursor.skip(10).limit(5).toArray();
+// get a promise for an array of the last 5 transactions
+cursor.limit(5).toArray();
 
 // stream all transactions to a HTTP response
 paylike.transactions.find(merchantPk)

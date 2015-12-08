@@ -18,7 +18,8 @@
 		"bluebird": "^3.0.5",
 		"qs": "^5.2.0",
 		"readable-stream": "^2.0.4",
-		"fetch-one": "^0.1.0"
+		"fetch-one": "^0.2.0",
+		"object-filter": "^1.0.2"
 	},
 	"devDependencies": {
 		"tape": "^4.2.1",
