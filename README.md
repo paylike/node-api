@@ -66,15 +66,6 @@ transactions.findOne(transactionPk) -> Promise(transaction)
 
 
 cards.create(merchantPk, opts) -> Promise(cardPk)
-
-
-// Cursor
-
-after(pk) -> cursor
-before(pk) -> cursor
-limit(limit) -> cursor
-stream -> stream
-toArray -> Promise(Array)
 ```
 
 A webshop would typically need only `capture`, `refund` and `void`. Some might
@@ -110,6 +101,14 @@ paylike.transactions.refund(transactionPkB, {
 ```
 
 ## Cursors
+
+```js
+after(pk) -> cursor
+before(pk) -> cursor
+limit(limit) -> cursor
+stream -> stream
+toArray -> Promise(Array)
+```
 
 All `find` methods return cursors.
 
