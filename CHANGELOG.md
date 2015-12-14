@@ -5,6 +5,8 @@ log follows the format outlined at http://keepachangelog.com.
 
 ## Unreleased
 
+## 0.0.6 - 2015-12-14
+
 ### Added
 
 - new cursor methods: `before` and `after`
