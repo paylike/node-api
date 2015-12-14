@@ -100,7 +100,7 @@ paylike.transactions.refund(transactionPkB, {
 });
 ```
 
-## Cursors
+## Cursors (pagination)
 
 ```js
 after(pk) -> cursor
