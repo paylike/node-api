@@ -5,6 +5,10 @@ log follows the format outlined at http://keepachangelog.com.
 
 ## Unreleased
 
+### Changed
+
+- default service URL changed (reverted)
+
 ## 0.0.6 - 2015-12-14
 
 ### Added
