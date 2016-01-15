@@ -1,7 +1,7 @@
 {
 	"name": "paylike",
 	"description": "Paylike API",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"main": "src",
 	"repository": "paylike/node-api",
 	"scripts": {
