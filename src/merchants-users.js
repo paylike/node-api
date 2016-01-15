@@ -10,22 +10,21 @@ function Users( service ){
 
 assign(Users.prototype, {
 	// https://github.com/paylike/api-docs#invite-user-to-a-merchant
-	add: function( merchantPk, opts, cb ){
-		return this.service.request('POST', '/merchants/'+merchantPk+'/invite', opts)
+	add: function( merchantId, opts, cb ){
+		return this.service.request('POST', '/merchants/'+merchantId+'/users', opts)
 			.return()
 			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#revoke-user-from-a-merchant
-	revoke: function( merchantPk, userPk, cb ){
-		return this.service.request('DELETE', '/merchants/'+merchantPk+'/users/'+userPk)
+	revoke: function( merchantId, userId, cb ){
+		return this.service.request('DELETE', '/merchants/'+merchantId+'/users/'+userId)
 			.return()
 			.nodeify(cb);
 	},
 
 	// https://github.com/paylike/api-docs#fetch-all-users-on-a-merchant
-	find: function( merchantPk, cb ){
-		return new this.service.Cursor(this.service,
-			'/merchants/'+merchantPk+'/users', 'users');
+	find: function( merchantId, cb ){
+		return new this.service.Cursor(this.service, '/merchants/'+merchantId+'/users');
 	},
 });

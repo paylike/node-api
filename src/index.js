@@ -17,7 +17,7 @@ function Paylike( key, opts ){
 	if (!(this instanceof Paylike))
 		return new Paylike(key, opts);
 
-	var service = new Service(opts && opts.url || 'https://midgard.paylike.io', key || (opts && opts.key));
+	var service = new Service(opts && opts.url || 'https://api.paylike.io', key || (opts && opts.key));
 
 	this.transactions = new Transactions(service);
 	this.merchants = new Merchants(service);
@@ -34,6 +34,7 @@ var errors = {
 	AuthorizationError: AuthorizationError,
 	PermissionsError: PermissionsError,
 	NotFoundError: NotFoundError,
+	ConflictError: ConflictError,
 	ValidationError: ValidationError,
 };
 
@@ -65,6 +66,9 @@ assign(Service.prototype, {
 				if (e.code === 400)
 					throw new ValidationError(e.message, e.body);
 
+				if (e.code === 409)
+					throw new ConflictError(e.message);
+
 				throw e;
 			})
 			.catch(fetch.response.Error, function( e ){
@@ -90,6 +94,9 @@ PermissionsError.prototype = Object.create(PaylikeError.prototype);
 
 function NotFoundError( message ){ this.message = message; }
 NotFoundError.prototype = Object.create(PaylikeError.prototype);
+
+function ConflictError( message ){ this.message = message; }
+ConflictError.prototype = Object.create(PaylikeError.prototype);
 
 function ValidationError( message, data ){
 	this.message = message;

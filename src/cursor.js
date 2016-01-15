@@ -7,7 +7,7 @@ var filter = require('object-filter');
 
 module.exports = Cursor;
 
-function Cursor( service, url, name, batchSize ){
+function Cursor( service, url, batchSize ){
 	stream.Readable.call(this, {
 		readableObjectMode: true,
 	});
@@ -21,7 +21,6 @@ function Cursor( service, url, name, batchSize ){
 
 	this._service = service;
 	this._url = url;
-	this._name = name;
 	this._streamBatchSize = batchSize;
 }
 
@@ -50,14 +49,14 @@ assign(Cursor.prototype, {
 		return this;
 	},
 
-	before: function( pk ){
-		this._before = pk;
+	before: function( id ){
+		this._before = id;
 
 		return this;
 	},
 
-	after: function( pk ){
-		this._after = pk;
+	after: function( id ){
+		this._after = id;
 
 		return this;
 	},
@@ -68,7 +67,7 @@ assign(Cursor.prototype, {
 			after: this._after,
 			sort: this._sort,
 			filter: this._filter,
-		}, isDefined), this._skip, this._limit, this._streamBatchSize, this._name);
+		}, isDefined), this._skip, this._limit, this._streamBatchSize);
 	},
 
 	toArray: function( cb ){
@@ -95,7 +94,7 @@ assign(Cursor.prototype, {
 	},
 });
 
-function ServiceStream( service, url, query, start, end, batchSize, name ){
+function ServiceStream( service, url, query, start, end, batchSize ){
 	stream.Readable.call(this, {
 		objectMode: true,
 	});
@@ -107,7 +106,6 @@ function ServiceStream( service, url, query, start, end, batchSize, name ){
 	this._skip = start || 0;
 	this._limit = end;
 	this._size = 0;
-	this._name = name;
 	this.batchSize = batchSize || 50;
 
 	this._ended = false;
@@ -142,8 +140,7 @@ assign(ServiceStream.prototype, {
 			query.skip = this._skip;
 		}
 
-		return this._service.request('GET', this._url, query).then(function( r ){
-			var data = r[that._name];
+		return this._service.request('GET', this._url, query).then(function( data ){
 			var length = data.length;
 			var thirsty = false;
 
@@ -159,7 +156,7 @@ assign(ServiceStream.prototype, {
 				if (that._size !== that._limit)
 					that.emit('exhausted');
 			} else if (thirsty) {
-				that._position = data[length - 1].pk;
+				that._position = data[length - 1].id;
 				return that.fetch();
 			}
 		}, function( err ){

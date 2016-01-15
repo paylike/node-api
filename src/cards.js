@@ -10,13 +10,13 @@ function Cards( service ){
 
 assign(Cards.prototype, {
 	// https://github.com/paylike/api-docs#save-a-card
-	create: function( merchantPk, opts, cb ){
-		return this.service.request('POST', '/merchants/'+merchantPk+'/cards', {
-			transactionPk: opts.transactionPk,
+	create: function( merchantId, opts, cb ){
+		return this.service.request('POST', '/merchants/'+merchantId+'/cards', {
+			transactionId: opts.transactionId,
 			notes: opts.notes,
 		})
 			.get('card')
-			.get('pk')
+			.get('id')
 			.nodeify(cb);
 	},
 })

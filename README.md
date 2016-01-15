@@ -41,34 +41,34 @@ apps.create(opts) -> Promise(app)
 apps.findOne() -> Promise(app)
 
 // list app's merchants
-apps.merchants.find(appPk) -> Cursor
+apps.merchants.find(appId) -> Cursor
 
 
-merchants.create(opts) -> Promise(merchantPk)
-merchants.update(merchantPk, opts) -> Promise
-merchants.findOne(merchantPk) -> Promise(merchant)
+merchants.create(opts) -> Promise(merchantId)
+merchants.update(merchantId, opts) -> Promise
+merchants.findOne(merchantId) -> Promise(merchant)
 
-merchants.users.add(merchantPk, opts) -> Promise
-merchants.users.revoke(merchantPk, userPk) -> Promise
-merchants.users.find(merchantPk) -> Promise(users)
+merchants.users.add(merchantId, opts) -> Promise
+merchants.users.revoke(merchantId, userId) -> Promise
+merchants.users.find(merchantId) -> Promise(users)
 
-merchants.apps.add(merchantPk, opts) -> Promise
-merchants.apps.revoke(merchantPk, appPk) -> Promise
-merchants.apps.find(merchantPk) -> Promise(apps)
+merchants.apps.add(merchantId, opts) -> Promise
+merchants.apps.revoke(merchantId, appId) -> Promise
+merchants.apps.find(merchantId) -> Promise(apps)
 
-merchants.lines.find(merchantPk) -> Promise(lines)
+merchants.lines.find(merchantId) -> Promise(lines)
 
-merchants.transactions.create(merchantPk, opts) -> Promise(transactionPk)
-merchants.transactions.find(merchantPk) -> Cursor
-
-
-transactions.capture(transactionPk, opts) -> Promise
-transactions.refund(transactionPk, opts) -> Promise
-transactions.void(transactionPk, opts) -> Promise
-transactions.findOne(transactionPk) -> Promise(transaction)
+merchants.transactions.create(merchantId, opts) -> Promise(transactionId)
+merchants.transactions.find(merchantId) -> Cursor
 
 
-cards.create(merchantPk, opts) -> Promise(cardPk)
+transactions.capture(transactionId, opts) -> Promise
+transactions.refund(transactionId, opts) -> Promise
+transactions.void(transactionId, opts) -> Promise
+transactions.findOne(transactionId) -> Promise(transaction)
+
+
+cards.create(merchantId, opts) -> Promise(cardId)
 ```
 
 A webshop would typically need only `capture`, `refund` and `void`. Some might
@@ -83,7 +83,7 @@ The Promise implementation is [Bluebird](https://github.com/petkaantonov/bluebir
 
 ```js
 // Promise style
-paylike.transactions.capture(transactionPkA, {
+paylike.transactions.capture(transactionIdA, {
 	amount: 100,
 })
 	.then(function(){
@@ -93,7 +93,7 @@ paylike.transactions.capture(transactionPkA, {
 	});
 
 // Callback style
-paylike.transactions.refund(transactionPkB, {
+paylike.transactions.refund(transactionIdB, {
 	amount: 100,
 }, function( err ){
 	if (err)
@@ -106,8 +106,8 @@ paylike.transactions.refund(transactionPkB, {
 ## Cursors (pagination)
 
 ```js
-after(pk) -> cursor
-before(pk) -> cursor
+after(id) -> cursor
+before(id) -> cursor
 limit(limit) -> cursor
 stream -> stream
 toArray -> Promise(Array)
@@ -127,13 +127,13 @@ The rationale for using `after`/`before` as opposed to `skip` is to achieve
 stable lists and reliable data synchronization.
 
 ```js
-var cursor = paylike.transactions.find(merchantPk);
+var cursor = paylike.transactions.find(merchantId);
 
 // get a promise for an array of the last 5 transactions
 cursor.limit(5).toArray();
 
 // stream all transactions to a HTTP response
-paylike.transactions.find(merchantPk)
+paylike.transactions.find(merchantId)
 	.stream()
 	.pipe(JSONStream.stringify())
 	.pipe(response);
@@ -145,7 +145,7 @@ The API will throw errors when things do not fly. All errors inherit from
 `PaylikeError`. A very verbose example of catching all types of errors:
 
 ```js
-paylike.transactions.capture(transactionPk, {
+paylike.transactions.capture(transactionId, {
 	amount: 100,
 	currency: 'EUR',
 })
@@ -169,7 +169,7 @@ and logging `PaylikeError` would suffice.
 ### Example (capturing a transaction)
 
 ```js
-paylike.transactions.capture(transactionPk, {
+paylike.transactions.capture(transactionId, {
 	amount: 1200,
 	currency: 'USD',
 	descriptor: 'Awesome #5011',
