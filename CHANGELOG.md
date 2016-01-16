@@ -5,6 +5,72 @@ log follows the format outlined at http://keepachangelog.com.
 
 ## Unreleased
 
+## 0.0.8 - 2016-01-16
+
+### Changed
+
+- default service URL is now `api.paylike.io`
+
+	The new service comes with a bunch of changes, but few are relevant to the
+	Node client:
+
+	- **replace pk with id**
+
+		**If you are using the Node.js client, and not relying on the response of
+		failed requests, this is the only change affecting you.**
+
+		This is the most significant change as it concerns all `GET` responses as
+		well as `POST` and `PUT` input data which references other documents
+		through its primary key (id).
+
+		The change is motivated by occasional confusion with a merchant account's
+		"public key" (found as `key` on the merchant document).
+
+	- paginated endpoints return arrays directly in the body
+
+		Previously paginated endpoints (e.g. `/merchants/[merchantId]/transactions`) would return an object such as:
+
+		```js
+		{
+			transactions: [ .. ],
+			pagination: { .. },
+		}
+		```
+
+		These endpoints will now simply return the array inside:
+
+		```js
+		[ .. ]
+		```
+
+	- all paginated endpoints returns newest documents first
+
+		A few endpoints were returning the newest document last:
+
+		- `/identities/[identityId]/merchants`
+		- `/merchants/[merchantId]/users`
+		- `/merchants/[merchantId]/apps`
+
+		In the future we will introduce custom sorting and filtering.
+
+	- remove pagination object from responses
+
+		Previously a "pagination" object was returned alongside the data, those
+		are no longer included.
+
+	- better HTTP status codes (see https://github.com/paylike/api-docs/blob/master/status-codes.md)
+	- new error messages (for consistency)
+	- `DELETE` requests no longer return data
+	- `PUT` requests no longer return data
+
+
+### Added
+
+- new error type `ConflictError`
+
+	Thrown when a request was unable to complete due to a constraint or
+	conflict with existing data.
+
 ## 0.0.7 - 2015-12-17
 
 ### Changed
