@@ -52,6 +52,7 @@ assign(Service.prototype, {
 	request: function( verb, path, query, cb ){
 		return fetch(verb, this.url+path, query, {
 			'Authorization': 'Basic ' + btoa(':'+this.key),
+			'X-Client': 'Node 0.0.8',
 		})
 			.catch(fetch.response.ClientError, function( e ){
 				if (e.code === 401)
