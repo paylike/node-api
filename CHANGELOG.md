@@ -5,6 +5,10 @@ log follows the format outlined at http://keepachangelog.com.
 
 ## Unreleased
 
+### Added
+
+- optional [`highWaterMark`](https://nodejs.org/api/stream.html#stream_class_stream_readable_1) parameter for `stream` method
+
 ## 0.0.8 - 2016-01-16
 
 ### Changed

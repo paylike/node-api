@@ -7,11 +7,7 @@ var filter = require('object-filter');
 
 module.exports = Cursor;
 
-function Cursor( service, url, batchSize ){
-	stream.Readable.call(this, {
-		readableObjectMode: true,
-	});
-
+function Cursor( service, url, highWaterMark ){
 	this._skip = 0;
 	this._limit = null;
 	this._sort = null;
@@ -21,7 +17,7 @@ function Cursor( service, url, batchSize ){
 
 	this._service = service;
 	this._url = url;
-	this._streamBatchSize = batchSize;
+	this._highWaterMark = highWaterMark;
 }
 
 assign(Cursor.prototype, {
@@ -61,13 +57,13 @@ assign(Cursor.prototype, {
 		return this;
 	},
 
-	stream: function(){
+	stream: function( highWaterMark ){
 		return new ServiceStream(this._service, this._url, filter({
 			before: this._before,
 			after: this._after,
 			sort: this._sort,
 			filter: this._filter,
-		}, isDefined), this._skip, this._limit, this._streamBatchSize);
+		}, isDefined), this._skip, this._limit, highWaterMark || this._highWaterMark);
 	},
 
 	toArray: function( cb ){
@@ -96,6 +92,7 @@ assign(Cursor.prototype, {
 
 function ServiceStream( service, url, query, start, end, batchSize ){
 	stream.Readable.call(this, {
+		highWaterMark: batchSize || 50,
 		objectMode: true,
 	});
 
@@ -105,65 +102,66 @@ function ServiceStream( service, url, query, start, end, batchSize ){
 	this._position = query.before || query.after || null;
 	this._skip = start || 0;
 	this._limit = end;
-	this._size = 0;
-	this.batchSize = batchSize || 50;
 
-	this._ended = false;
+	this._size = 0;
 	this._busy = false;
 }
 
 ServiceStream.prototype = Object.create(stream.Readable.prototype);
 
 assign(ServiceStream.prototype, {
-	_read: function( n ){
-		if (this._busy || this._ended)
+	_read: function( batchSize ){
+		if (this._busy)
 			return;
 
 		this._busy = true;
 
-		this.fetch();
-	},
-
-	fetch: function(){
-		var that = this;
-
-		var query = assign({}, this._query, {
-			limit: this._limit ? Math.min(this.batchSize, this._limit - this._size) : this.batchSize,
-		});
-
-		if (this._position) {
-			if (query.after)
-				query.after = this._position;
-			else
-				query.before = this._position;
-		} else if (this._skip) {
-			query.skip = this._skip;
-		}
-
-		return this._service.request('GET', this._url, query).then(function( data ){
-			var length = data.length;
-			var thirsty = false;
-
-			for (var i = 0;i < length;i++)
-				thirsty = that.push(data[i]);
-
-			that._size += length;
-
-			if (length < that.batchSize || that._size === that._limit) {
-				that._ended = true;
-				that.push(null);
-
-				if (that._size !== that._limit)
-					that.emit('exhausted');
-			} else if (thirsty) {
-				that._position = data[length - 1].id;
-				return that.fetch();
-			}
-		}, function( err ){
-			that.emit('error', err);
-		});
+		fetch(this, batchSize);
 	},
 });
+
+function fetch( stream, batchSize ){
+	var query = assign({}, stream._query, {
+		limit: stream._limit ? Math.min(batchSize, stream._limit - stream._size) : batchSize,
+	});
+
+	if (stream._position) {
+		if (query.after)
+			query.after = stream._position;
+		else
+			query.before = stream._position;
+	} else if (stream._skip) {
+		query.skip = stream._skip;
+	}
+
+	return stream._service.request('GET', stream._url, query).then(function( data ){
+		var length = data.length;
+		var thirsty = false;
+
+		for (var i = 0;i < length;i++)
+			thirsty = stream.push(data[i]);
+
+		stream._size += length;
+
+		if (length < batchSize || stream._size === stream._limit) {
+			stream.push(null);
+
+			if (stream._size !== stream._limit)
+				stream.emit('exhausted');
+
+			return;
+		}
+
+		stream._position = data[length - 1].id;
+
+		if (thirsty)
+			return fetch(stream, batchSize);
+
+		stream._busy = false;
+	}, function( err ){
+		stream.emit('error', err);
+	});
+}
 
 function isDefined( f ){
 	return f !== undefined && f !== null;

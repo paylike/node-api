@@ -109,7 +109,7 @@ paylike.transactions.refund(transactionIdB, {
 after(id) -> cursor
 before(id) -> cursor
 limit(limit) -> cursor
-stream -> stream
+stream([highWaterMark]) -> stream
 toArray -> Promise(Array)
 ```
 
