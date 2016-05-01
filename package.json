@@ -14,14 +14,14 @@
 	"dependencies": {
 		"object-assign": "^4.0.1",
 		"btoa-lite": "^1.0.0",
-		"request": "^2.64.0",
+		"request": "^2.72.0",
 		"bluebird": "^3.0.5",
-		"readable-stream": "^2.0.4",
-		"fetch-one": "^0.3.0",
+		"readable-stream": "^2.1.2",
+		"fetch-one": "^0.6.1",
 		"object-filter": "^1.0.2"
 	},
 	"devDependencies": {
-		"tape": "^4.2.1",
+		"tape": "^4.5.1",
 		"testling": "^1.7.1"
 	}
 }
