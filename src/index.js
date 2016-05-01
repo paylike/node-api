@@ -17,16 +17,15 @@ function Paylike( key, opts ){
 	if (!(this instanceof Paylike))
 		return new Paylike(key, opts);
 
-	var service = new Service(opts && opts.url || 'https://api.paylike.io', key || (opts && opts.key));
+	var service = this.service = new Service({
+		url: opts && opts.url,
+		key: key || (opts && opts.key),
+	});
 
 	this.transactions = new Transactions(service);
 	this.merchants = new Merchants(service);
 	this.cards = new Cards(service);
 	this.apps = new Apps(service);
-
-	this.setKey = function( key ){
-		service.key = key;
-	};
 }
 
 var errors = {
@@ -38,12 +37,26 @@ var errors = {
 	ValidationError: ValidationError,
 };
 
-assign(Paylike, errors);
-assign(Paylike.prototype, errors);
+assign(Paylike, errors, {
+	Transactions: Transactions,
+	Merchants: Merchants,
+	Cards: Cards,
+	Apps: Apps,
+	Cursor: Cursor,
 
-function Service( url, key ){
-	this.url = url;
-	this.key = key;
+	Service: Service,
+});
+
+assign(Paylike.prototype, errors, {
+	setKey: function( key ){
+		this.service.key = key;
+	},
+});
+
+function Service( opts ){
+	this.url = opts.url || 'https://api.paylike.io';
+	this.key = opts.key;
+	this.agent = opts.agent || 'Node 1.0.0';
 }
 
 assign(Service.prototype, {
@@ -52,7 +65,7 @@ assign(Service.prototype, {
 	request: function( verb, path, query, cb ){
 		return fetch(verb, this.url+path, query, {
 			'Authorization': 'Basic ' + btoa(':'+this.key),
-			'X-Client': 'Node 1.0.0',
+			'X-Client': this.agent,
 		})
 			.catch(fetch.response.ClientError, function( e ){
 				if (e.code === 401)
