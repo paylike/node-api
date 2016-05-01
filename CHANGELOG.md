@@ -5,6 +5,15 @@ log follows the format outlined at http://keepachangelog.com.
 
 ## Unreleased
 
+## 1.0.1 - 2016-05-01
+
+### Others
+
+- Upgraded dependencies
+- Removed unused dependencies
+- Expose some low level methods
+- Update version header
+
 ## 1.0.0 - 2016-01-17
 
 ### Added
