@@ -5,6 +5,13 @@ log follows the format outlined at http://keepachangelog.com.
 
 ## Unreleased
 
+### Added
+
+- `keepAlive` method on streams returned by `cursor.stream()`
+
+	Keeps the stream open instead of closing it when there is no more data.
+	Polls for new data every five seconds (configurable).
+
 ## 1.1.0 - 2017-01-20
 
 ### Added

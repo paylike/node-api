@@ -83,7 +83,7 @@ assign(Cursor.prototype, {
 	},
 });
 
-function ServiceStream( service, url, query, end, batchSize ){
+function ServiceStream( service, url, query, end, batchSize, delay ){
 	stream.Readable.call(this, {
 		highWaterMark: batchSize || 50,
 		objectMode: true,
@@ -97,6 +97,7 @@ function ServiceStream( service, url, query, end, batchSize ){
 
 	this._size = 0;
 	this._busy = false;
+	this._delay = delay || 5000;
 }
 
 ServiceStream.prototype = Object.create(stream.Readable.prototype);
@@ -110,11 +111,24 @@ assign(ServiceStream.prototype, {
 
 		fetch(this, batchSize);
 	},
+
+	keepAlive: function( delay ){
+		this._keepAlive = !!delay;
+
+		if (typeof delay === 'number')
+			this._delay = delay
+
+		return this;
+	},
 });
 
 function fetch( stream, batchSize ){
+	var askSize = stream._limit
+		? Math.min(batchSize, stream._limit - stream._size)
+		: batchSize;
+
 	var query = assign({}, stream._query, {
-		limit: stream._limit ? Math.min(batchSize, stream._limit - stream._size) : batchSize,
+		limit: askSize,
 	});
 
 	if (stream._position) {
@@ -128,24 +142,34 @@ function fetch( stream, batchSize ){
 		var length = data.length;
 		var thirsty = false;
 
-		for (var i = 0;i < length;i++)
-			thirsty = stream.push(data[i]);
+		if (length !== 0) {
+			for (var i = 0;i < length;i++)
+				thirsty = stream.push(data[i]);
 
-		stream._size += length;
-
-		if (length < batchSize || stream._size === stream._limit) {
-			stream.push(null);
-
-			if (stream._size !== stream._limit)
-				stream.emit('exhausted');
-
-			return;
+			stream._size += length;
+			stream._position = data[length - 1].id;
+		} else {
+			thirsty = true;
 		}
 
-		stream._position = data[length - 1].id;
+		var exhausted = length < askSize;
+		var full = stream._size === stream._limit;
 
-		if (thirsty)
+		if (thirsty && !full && !exhausted)
 			return fetch(stream, batchSize);
+
+		if (!stream._keepAlive && (exhausted || full))
+			stream.push(null);
+
+		if (exhausted)
+			stream.emit('exhausted');
+
+		if (thirsty && !full && stream._keepAlive)
+			return Promise
+				.delay(stream._delay)
+				.then(function(){
+					return fetch(stream, batchSize);
+				});
 
 		stream._busy = false;
 	}, function( err ){

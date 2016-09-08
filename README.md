@@ -112,6 +112,9 @@ before(id) -> cursor
 limit(limit) -> cursor
 stream([highWaterMark]) -> stream
 toArray -> Promise(Array)
+
+// never close the stream, poll each `delay` ms
+stream.keepAlive([delay]) -> stream
 ```
 
 All `find` methods return cursors.
