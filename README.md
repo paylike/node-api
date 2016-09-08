@@ -115,17 +115,22 @@ until(Date) -> cursor
 
 limit(limit) -> cursor
 
-stream([highWaterMark]) -> stream
+// keep the stream open and poll each `delay` ms
+keepAlive([delay]) -> pull stream
+
 toArray -> Promise(Array)
 
-// never close the stream, poll each `delay` ms
-stream.keepAlive([delay]) -> stream
+// convenience for pull(cursor, ...)
+pull(streamA, streamB...) -> pull stream
 ```
 
 All `find` methods return cursors.
 
-A cursor is simply an object wrapping a result of unknown length. It polls the
-server in batches as needed.
+A cursor is a [pull-stream](https://github.com/pull-stream/pull-stream)
+wrapping the requested data. It polls the server in batches as needed.
+
+If you do not already know about pull streams, I would like to encourage you
+to read [Dominic Tarr's introduction](http://dominictarr.com/post/149248845122/pull-streams-pull-streams-are-a-very-simple).
 
 If you specify a starting point using `before()` you will get the newest
 objects first (which is also the default), but using `after` you will receive
@@ -141,9 +146,29 @@ var cursor = paylike.transactions.find(merchantId);
 // get a promise for an array of the last 5 transactions
 cursor.limit(5).toArray();
 
-// stream all transactions to a HTTP response
-paylike.transactions.find(merchantId)
-	.stream()
+
+var pull = require('pull-stream');
+
+// print all transactions
+pull(
+	paylike.transactions.find(merchantId),
+	pull.log()
+)
+
+// live stream transaction amounts as they occur
+pull(
+	paylike.transactions.find(merchantId)
+		.since(new Date())
+		.keepAlive(),
+	pull.map(t => t.currency+' '+t.amount),
+	pull.log()
+)
+
+// stream all transactions to a HTTP response (interop with a classic Node.js
+// stream)
+var toStream = require('pull-stream-to-stream');
+
+toStream(paylike.transactions.find(merchantId))
 	.pipe(JSONStream.stringify())
 	.pipe(response);
 ```

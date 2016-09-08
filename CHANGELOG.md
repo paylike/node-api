@@ -20,6 +20,46 @@ log follows the format outlined at http://keepachangelog.com.
 ### Changed
 
 - Fix order bug when using `cursor.after` and `cursor.before` simultaneously
+- Switched to [pull-streams](https://github.com/pull-stream/pull-stream)
+
+	All cursors are now pull streams as opposed to classic Node.js streams.
+	The reasons being:
+
+	- *Much* smaller footprint for browser bundles as classic streams are
+	  complex and require events, buffers, etc.
+	- Less opinionated
+	- Does not impose any libraries on the consumer (e.g. `readable-stream`)
+
+	The `.stream()` method has been removed as it is no longer needed.
+
+	The `.toArray()` method is unaffacted and code using it will continue to
+	work without change.
+
+	Examples of migrating to pull streams with the least possible impact:
+
+	*Before:*
+
+	```js
+	merchants
+		.transactions
+		.find(merchantId)
+		.stream()
+		.pipe(...)
+	```
+
+	*After:*
+
+	```js
+	var toStream = require('pull-stream-to-stream');
+
+	toStream.source(merchants
+		.transactions
+		.find(merchantId))
+		.pipe(...)
+	```
+
+	If you do not already know about pull streams, I would like to encourage
+	you to read [Dominic Tarr's introduction](http://dominictarr.com/post/149248845122/pull-streams-pull-streams-are-a-very-simple).
 
 ## 1.1.0 - 2017-01-20
 

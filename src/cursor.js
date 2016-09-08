@@ -1,23 +1,81 @@
 'use strict';
 
-var Promise = require('bluebird');
 var assign = require('object-assign');
-var stream = require('readable-stream');
+var collect = require('pull-stream/sinks/collect');
+var pull = require('pull-stream/pull');
 var filter = require('object-filter');
 var objectIdFromDate = require('date-to-object-id-hex');
 
 module.exports = Cursor;
 
-function Cursor( service, url, highWaterMark ){
+function Cursor( service, url, batchSize ){
 	this._limit = null;
 	this._sort = null;
 	this._filter = null;
 	this._before = null;
 	this._after = null;
+	this._keepAlive = false;
+	this._delay = 5000;
+	this._batchSize = batchSize || 50;
 
 	this._service = service;
 	this._url = url;
-	this._highWaterMark = highWaterMark;
+
+	var cursor = this;
+
+	var size = 0;
+
+	var batch;
+	var batchLength = 0;
+	var batchIdx = 0;
+
+	this.source = read;
+
+	function read( abort, cb ){
+		if (abort)
+			return cb && cb(abort);
+
+		if (batchIdx < batchLength)
+			return cb(null, batch[batchIdx++]);
+
+		var ask = cursor._limit
+			? Math.min(cursor._batchSize, cursor._limit - size)
+			: cursor._batchSize;
+
+		if (ask === 0 || (!cursor._keepAlive && batch !== undefined && batchLength < cursor._batchSize))
+			return cb(true);
+
+		var query = filter({
+			before: cursor._before,
+			after: cursor._after,
+			sort: cursor._sort,
+			filter: cursor._filter,
+			limit: ask,
+		}, isDefined);
+
+		if (batchLength !== 0) {
+			if (query.after && !query.before) {
+				query.after = batch[batchLength - 1].id;
+			} else {
+				query.before = batch[batchLength - 1].id;
+			}
+		}
+
+		service.request('GET', url, query).then(function( data ){
+			if (cursor._keepAlive && data.length === 0)
+				return setTimeout(function(){
+					read(null, cb);
+				}, cursor._delay);
+
+			batch = data;
+			batchLength = data.length;
+			batchIdx = 0;
+
+			size += batchLength;
+
+			return read(null, cb);
+		}, cb);
+	}
 }
 
 assign(Cursor.prototype, {
@@ -63,132 +121,48 @@ assign(Cursor.prototype, {
 		return this;
 	},
 
-	stream: function( highWaterMark ){
-		return new ServiceStream(this._service, this._url, filter({
-			before: this._before,
-			after: this._after,
-			sort: this._sort,
-			filter: this._filter,
-		}, isDefined), this._limit, highWaterMark || this._highWaterMark);
-	},
-
-	toArray: function( cb ){
-		var results = [];
-
-		var stream = this.stream()
-			.on('data', function( d ){
-				results.push(d);
-			});
-
-		return new Promise(function( rs, rj ){
-			stream
-				.on('end', function( err ){
-					if (err)
-						return rj(err);
-
-					return rs(results);
-				})
-				.on('error', function( err ){
-					rj(err);
-				});
-		})
-			.nodeify(cb);
-	},
-});
-
-function ServiceStream( service, url, query, end, batchSize, delay ){
-	stream.Readable.call(this, {
-		highWaterMark: batchSize || 50,
-		objectMode: true,
-	});
-
-	this._service = service;
-	this._url = url;
-	this._query = query;
-	this._position = query.before || query.after || null;
-	this._limit = end;
-
-	this._size = 0;
-	this._busy = false;
-	this._delay = delay || 5000;
-}
-
-ServiceStream.prototype = Object.create(stream.Readable.prototype);
-
-assign(ServiceStream.prototype, {
-	_read: function( batchSize ){
-		if (this._busy)
-			return;
-
-		this._busy = true;
-
-		fetch(this, batchSize);
-	},
-
-	keepAlive: function( delay ){
-		this._keepAlive = !!delay;
-
-		if (typeof delay === 'number')
-			this._delay = delay
+	batchSize: function( batchSize ){
+		this._batchSize = batchSize;
 
 		return this;
 	},
+
+	keepAlive: function( delay ){
+		if (Number.isInteger(delay))
+			this._delay = delay;
+
+		this._keepAlive = !!delay;
+
+		return this;
+	},
+
+	pull: function(){
+		var pipes = new Array(arguments.length);
+
+		for (var i = 0;i < pipes.length;i++)
+			pipes[i] = arguments[i];
+
+		pipes.unshift(this.source);
+
+		return pull.apply(null, pipes);
+	},
+
+	toArray: function( cb ){
+		var source = this.source;
+
+		if (cb)
+			return collect(cb)(source);
+
+		return new Promise(function( rslv, rjct ){
+			collect(function( err, items ){
+				if (err)
+					return rjct(err);
+
+				rslv(items);
+			})(source);
+		});
+	},
 });
-
-function fetch( stream, batchSize ){
-	var askSize = stream._limit
-		? Math.min(batchSize, stream._limit - stream._size)
-		: batchSize;
-
-	var query = assign({}, stream._query, {
-		limit: askSize,
-	});
-
-	if (stream._position) {
-		if (query.after && !query.before)
-			query.after = stream._position;
-		else
-			query.before = stream._position;
-	}
-
-	return stream._service.request('GET', stream._url, query).then(function( data ){
-		var length = data.length;
-		var thirsty = false;
-
-		if (length !== 0) {
-			for (var i = 0;i < length;i++)
-				thirsty = stream.push(data[i]);
-
-			stream._size += length;
-			stream._position = data[length - 1].id;
-		} else {
-			thirsty = true;
-		}
-
-		var exhausted = length < askSize;
-		var full = stream._size === stream._limit;
-
-		if (thirsty && !full && !exhausted)
-			return fetch(stream, batchSize);
-
-		if (!stream._keepAlive && (exhausted || full))
-			stream.push(null);
-
-		if (exhausted)
-			stream.emit('exhausted');
-
-		if (thirsty && !full && stream._keepAlive)
-			return Promise
-				.delay(stream._delay)
-				.then(function(){
-					return fetch(stream, batchSize);
-				});
-
-		stream._busy = false;
-	}, function( err ){
-		stream.emit('error', err);
-	});
-}
 
 function isDefined( f ){
 	return f !== undefined && f !== null;

@@ -15,13 +15,13 @@
 		"object-assign": "^4.0.1",
 		"btoa-lite": "^1.0.0",
 		"request": "^2.72.0",
-		"bluebird": "^3.0.5",
-		"readable-stream": "^2.1.2",
 		"fetch-one": "^0.6.1",
 		"object-filter": "^1.0.2",
-		"date-to-object-id-hex": "^1.0.0"
+		"date-to-object-id-hex": "^1.0.0",
+		"pull-stream": "^3.5.0"
 	},
 	"devDependencies": {
+		"bluebird": "^3.0.5",
 		"tape": "^4.5.1",
 		"testling": "^1.7.1"
 	}
