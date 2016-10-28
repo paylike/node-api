@@ -12,6 +12,10 @@ log follows the format outlined at http://keepachangelog.com.
 	Keeps the stream open instead of closing it when there is no more data.
 	Polls for new data every five seconds (configurable).
 
+### Changed
+
+- Fix order bug when using `cursor.after` and `cursor.before` simultaneously
+
 ## 1.1.0 - 2017-01-20
 
 ### Added

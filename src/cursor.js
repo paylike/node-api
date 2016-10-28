@@ -132,7 +132,7 @@ function fetch( stream, batchSize ){
 	});
 
 	if (stream._position) {
-		if (query.after)
+		if (query.after && !query.before)
 			query.after = stream._position;
 		else
 			query.before = stream._position;
