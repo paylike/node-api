@@ -4,6 +4,7 @@ var Promise = require('bluebird');
 var assign = require('object-assign');
 var stream = require('readable-stream');
 var filter = require('object-filter');
+var objectIdFromDate = require('date-to-object-id-hex');
 
 module.exports = Cursor;
 
@@ -46,6 +47,18 @@ assign(Cursor.prototype, {
 
 	after: function( id ){
 		this._after = id;
+
+		return this;
+	},
+
+	until: function( date ){
+		this._before = date && objectIdFromDate(date);
+
+		return this;
+	},
+
+	since: function( date ){
+		this._after = date && objectIdFromDate(date);
 
 		return this;
 	},

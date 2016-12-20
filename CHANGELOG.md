@@ -12,6 +12,11 @@ log follows the format outlined at http://keepachangelog.com.
 	Keeps the stream open instead of closing it when there is no more data.
 	Polls for new data every five seconds (configurable).
 
+- `cursor.until` and `cursor.since` convenience methods
+
+	Pass a `Date` directly to `since` or `until` to query data within a given
+	timeframe.
+
 ### Changed
 
 - Fix order bug when using `cursor.after` and `cursor.before` simultaneously
