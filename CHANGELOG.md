@@ -5,6 +5,13 @@ log follows the format outlined at http://keepachangelog.com.
 
 ## Unreleased
 
+### Removed
+
+- `cursor.skip`
+
+	The method was never documented as it was deprecated when this client
+	started. It is no longer supported by the server API.
+
 ## 1.0.1 - 2016-05-01
 
 ### Others

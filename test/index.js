@@ -63,7 +63,6 @@ test('apps', function( t ){
 				.merchants
 				.find(appId)
 				.filter({ test: true })
-				.skip(2)
 				.limit(2)
 				.toArray();
 
@@ -72,7 +71,7 @@ test('apps', function( t ){
 				.spread(function( merchants, selection ){
 					t.equal(selection.length, 2);
 
-					t.deepEqual(selection, merchants.splice(2, 2));
+					t.deepEqual(selection, merchants.splice(0, 2));
 				});
 		});
 	});

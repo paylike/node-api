@@ -8,7 +8,6 @@ var filter = require('object-filter');
 module.exports = Cursor;
 
 function Cursor( service, url, highWaterMark ){
-	this._skip = 0;
 	this._limit = null;
 	this._sort = null;
 	this._filter = null;
@@ -29,12 +28,6 @@ assign(Cursor.prototype, {
 
 	sort: function( sort ){
 		this._sort = sort;
-
-		return this;
-	},
-
-	skip: function( skip ){
-		this._skip = skip;
 
 		return this;
 	},
@@ -63,7 +56,7 @@ assign(Cursor.prototype, {
 			after: this._after,
 			sort: this._sort,
 			filter: this._filter,
-		}, isDefined), this._skip, this._limit, highWaterMark || this._highWaterMark);
+		}, isDefined), this._limit, highWaterMark || this._highWaterMark);
 	},
 
 	toArray: function( cb ){
@@ -90,7 +83,7 @@ assign(Cursor.prototype, {
 	},
 });
 
-function ServiceStream( service, url, query, start, end, batchSize ){
+function ServiceStream( service, url, query, end, batchSize ){
 	stream.Readable.call(this, {
 		highWaterMark: batchSize || 50,
 		objectMode: true,
@@ -100,7 +93,6 @@ function ServiceStream( service, url, query, start, end, batchSize ){
 	this._url = url;
 	this._query = query;
 	this._position = query.before || query.after || null;
-	this._skip = start || 0;
 	this._limit = end;
 
 	this._size = 0;
@@ -130,8 +122,6 @@ function fetch( stream, batchSize ){
 			query.after = stream._position;
 		else
 			query.before = stream._position;
-	} else if (stream._skip) {
-		query.skip = stream._skip;
 	}
 
 	return stream._service.request('GET', stream._url, query).then(function( data ){
