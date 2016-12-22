@@ -131,7 +131,9 @@ assign(Cursor.prototype, {
 		if (Number.isInteger(delay))
 			this._delay = delay;
 
-		this._keepAlive = !!delay;
+		this._keepAlive = delay === undefined
+			? true
+			: !!delay;
 
 		return this;
 	},
@@ -148,6 +150,9 @@ assign(Cursor.prototype, {
 	},
 
 	toArray: function( cb ){
+		if (this._keepAlive)
+			throw new Error('Calling cursor.toArray with "keep alive" would yield a never resolving promise');
+
 		var source = this.source;
 
 		if (cb)

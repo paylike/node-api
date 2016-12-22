@@ -61,6 +61,9 @@ log follows the format outlined at http://keepachangelog.com.
 	If you do not already know about pull streams, I would like to encourage
 	you to read [Dominic Tarr's introduction](http://dominictarr.com/post/149248845122/pull-streams-pull-streams-are-a-very-simple).
 
+- Calling `cursor.keepAlive` without an argument is now equivalent to passing
+  `true`
+
 ## 1.1.0 - 2017-01-20
 
 ### Added
