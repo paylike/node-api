@@ -21,7 +21,7 @@ function Merchants( service ){
 assign(Merchants.prototype, {
 	// https://github.com/paylike/api-docs#create-a-merchant
 	create: function( opts, cb ){
-		return this.service.request('POST', '/merchants', opts)
+		return this.service.post('/merchants', opts)
 			.get('merchant')
 			.get('id')
 			.nodeify(cb);
@@ -29,14 +29,13 @@ assign(Merchants.prototype, {
 
 	// https://github.com/paylike/api-docs#update-a-merchant
 	update: function( merchantId, opts, cb ){
-		return this.service.request('PUT', '/merchants/'+merchantId, opts)
-			.return()
+		return this.service.put('/merchants/'+merchantId, opts)
 			.nodeify(cb);
 	},
 
 	//  https://github.com/paylike/api-docs#fetch-a-merchant
 	findOne: function( merchantId, cb ){
-		return this.service.request('GET', '/merchants/'+merchantId)
+		return this.service.get('/merchants/'+merchantId)
 			.get('merchant')
 			.nodeify(cb);
 	},

@@ -1,8 +1,8 @@
 'use strict';
 
 var assign = require('object-assign');
-var btoa = require('btoa-lite');
-var fetch = require('fetch-one');
+var fetch = require('pull-fetch-iso');
+var toPromise = require('pull-to-promise');
 
 var Cursor = require('./cursor');
 
@@ -62,36 +62,72 @@ function Service( opts ){
 assign(Service.prototype, {
 	Cursor: Cursor,
 
-	request: function( verb, path, query, cb ){
-		return fetch(verb, this.url+path, query, {
-			'Authorization': 'Basic ' + btoa(':'+this.key),
-			'X-Client': this.agent,
-		})
-			.catch(fetch.response.ClientError, function( e ){
-				if (e.code === 401)
-					throw new AuthorizationError(e.message);
-
-				if (e.code === 403)
-					throw new PermissionsError(e.message);
-
-				if (e.code === 404)
-					throw new NotFoundError(e.message);
-
-				if (e.code === 400)
-					throw new ValidationError(e.message, e.body);
-
-				if (e.code === 409)
-					throw new ConflictError(e.message);
-
-				throw e;
-			})
-			.catch(fetch.response.Error, function( e ){
-				throw new PaylikeError(e.message);
-			})
-			.get('body')
+	get: function( path, query, cb ){
+		return toPromise(this.stream('GET', path, query))
 			.nodeify(cb);
 	},
+
+	post: function( path, body, cb ){
+		return toPromise.binary(this.stream('POST', path, null, body))
+			.nodeify(cb);
+	},
+
+	put: function( path, body, cb ){
+		return toPromise(this.stream('PUT', path, null, body), false)
+			.nodeify(cb);
+	},
+
+	delete: function( path, query, cb ){
+		return toPromise.binary(this.stream('DELETE', path, query), false)
+			.nodeify(cb);
+	},
+
+	stream: function( verb, path, query, body ){
+		return httpToError(fetch({
+			method: verb,
+			host: this.url,
+			path: path,
+			query: query,
+			data: body,
+			headers: {
+				'Authorization': 'Basic ' + fetch.btoa(':'+this.key),
+				'X-Client': this.agent,
+			},
+		}));
+	},
 });
+
+function httpToError( read ){
+	return function( abort, cb ){
+		read(abort, function( end, chunk ){
+			if (end === null)
+				return cb(null, chunk);
+
+			if (end === true)
+				return cb(true);
+
+			if (end.code === 401)
+				return cb(new AuthorizationError(end.message));
+
+			if (end.code === 403)
+				return cb(new PermissionsError(end.message));
+
+			if (end.code === 404)
+				return cb(new NotFoundError(end.message));
+
+			if (end.code === 400)
+				return cb(new ValidationError(end.message, end.body));
+
+			if (end.code === 409)
+				return cb(new ConflictError(end.message));
+
+			if (end instanceof fetch.response.Error)
+				return cb(new PaylikeError(end.message));
+
+			cb(end);
+		});
+	};
+}
 
 function PaylikeError( message ){
 	this.message = message;

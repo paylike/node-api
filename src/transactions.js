@@ -11,7 +11,7 @@ function Transactions( service ){
 assign(Transactions.prototype, {
 	// https://github.com/paylike/api-docs#capture-a-transaction
 	capture: function( transactionId, opts, cb ){
-		return this.service.request('POST', '/transactions/'+transactionId+'/captures', {
+		return this.service.post('/transactions/'+transactionId+'/captures', {
 			amount: opts.amount,
 			currency: opts.currency,
 			descriptor: opts.descriptor,
@@ -22,7 +22,7 @@ assign(Transactions.prototype, {
 
 	// https://github.com/paylike/api-docs#refund-a-transaction
 	refund: function( transactionId, opts, cb ){
-		return this.service.request('POST', '/transactions/'+transactionId+'/refunds', {
+		return this.service.post('/transactions/'+transactionId+'/refunds', {
 			amount: opts.amount,
 			descriptor: opts.descriptor,
 		})
@@ -32,7 +32,7 @@ assign(Transactions.prototype, {
 
 	// https://github.com/paylike/api-docs#void-a-transaction
 	void: function( transactionId, opts, cb ){
-		return this.service.request('POST', '/transactions/'+transactionId+'/voids', {
+		return this.service.post('/transactions/'+transactionId+'/voids', {
 			amount: opts.amount,
 		})
 			.return()
@@ -41,7 +41,7 @@ assign(Transactions.prototype, {
 
 	// https://github.com/paylike/api-docs#fetch-a-transaction
 	findOne: function( transactionId, cb ){
-		return this.service.request('GET', '/transactions/'+transactionId)
+		return this.service.get('/transactions/'+transactionId)
 			.get('transaction')
 			.nodeify(cb);
 	},

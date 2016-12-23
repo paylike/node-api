@@ -1,10 +1,10 @@
 'use strict';
 
 var assign = require('object-assign');
-var collect = require('pull-stream/sinks/collect');
 var pull = require('pull-stream/pull');
 var filter = require('object-filter');
 var objectIdFromDate = require('date-to-object-id-hex');
+var toPromise = require('pull-to-promise');
 
 module.exports = Cursor;
 
@@ -24,10 +24,9 @@ function Cursor( service, url, batchSize ){
 	var cursor = this;
 
 	var size = 0;
-
-	var batch;
-	var batchLength = 0;
-	var batchIdx = 0;
+	var ask = 0;
+	var last;
+	var pump;
 
 	this.source = read;
 
@@ -35,14 +34,41 @@ function Cursor( service, url, batchSize ){
 		if (abort)
 			return cb && cb(abort);
 
-		if (batchIdx < batchLength)
-			return cb(null, batch[batchIdx++]);
+		if (pump)
+			return pump(null, function( end, chunk ){
+				if (end !== null) {
+					if (end !== true)
+						return cb(end);
 
-		var ask = cursor._limit
+					pump = null;
+
+					return read(null, cb);
+				}
+
+				size++;
+				ask--;
+
+				last = chunk;
+
+				return cb(null, chunk);
+			});
+
+		if (ask !== 0) {
+			if (!cursor._keepAlive)
+				return cb(true);
+
+			ask = 0;
+
+			return setTimeout(function(){
+				read(null, cb);
+			}, cursor._delay);
+		}
+
+		ask = cursor._limit
 			? Math.min(cursor._batchSize, cursor._limit - size)
 			: cursor._batchSize;
 
-		if (ask === 0 || (!cursor._keepAlive && batch !== undefined && batchLength < cursor._batchSize))
+		if (ask === 0)
 			return cb(true);
 
 		var query = filter({
@@ -53,28 +79,17 @@ function Cursor( service, url, batchSize ){
 			limit: ask,
 		}, isDefined);
 
-		if (batchLength !== 0) {
+		if (last !== undefined) {
 			if (query.after && !query.before) {
-				query.after = batch[batchLength - 1].id;
+				query.after = last.id;
 			} else {
-				query.before = batch[batchLength - 1].id;
+				query.before = last.id;
 			}
 		}
 
-		service.request('GET', url, query).then(function( data ){
-			if (cursor._keepAlive && data.length === 0)
-				return setTimeout(function(){
-					read(null, cb);
-				}, cursor._delay);
+		pump = service.stream('GET', url, query);
 
-			batch = data;
-			batchLength = data.length;
-			batchIdx = 0;
-
-			size += batchLength;
-
-			return read(null, cb);
-		}, cb);
+		read(null, cb);
 	}
 }
 
@@ -153,19 +168,8 @@ assign(Cursor.prototype, {
 		if (this._keepAlive)
 			throw new Error('Calling cursor.toArray with "keep alive" would yield a never resolving promise');
 
-		var source = this.source;
-
-		if (cb)
-			return collect(cb)(source);
-
-		return new Promise(function( rslv, rjct ){
-			collect(function( err, items ){
-				if (err)
-					return rjct(err);
-
-				rslv(items);
-			})(source);
-		});
+		return toPromise(this.source, true)
+			.nodeify(cb);
 	},
 });
 

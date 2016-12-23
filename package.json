@@ -13,12 +13,11 @@
 	},
 	"dependencies": {
 		"object-assign": "^4.0.1",
-		"btoa-lite": "^1.0.0",
-		"request": "^2.72.0",
-		"fetch-one": "^0.6.1",
 		"object-filter": "^1.0.2",
 		"date-to-object-id-hex": "^1.0.0",
-		"pull-stream": "^3.5.0"
+		"pull-fetch-iso": "^0.0.1",
+		"pull-stream": "^3.5.0",
+		"pull-to-promise": "^0.0.3"
 	},
 	"devDependencies": {
 		"bluebird": "^3.0.5",

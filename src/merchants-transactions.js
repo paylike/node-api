@@ -11,7 +11,7 @@ function Transactions( service ){
 assign(Transactions.prototype, {
 	// https://github.com/paylike/api-docs#create-a-transaction
 	create: function( merchantId, opts, cb ){
-		return this.service.request('POST', '/merchants/'+merchantId+'/transactions', {
+		return this.service.post('/merchants/'+merchantId+'/transactions', {
 				transactionId: opts.transactionId,
 				cardId: !opts.transactionId && opts.cardId,
 
