@@ -149,7 +149,7 @@ test('merchants', function( t ){
 				});
 		});
 
-		test.test('revoke', function( t ){
+		t.test('revoke', function( t ){
 			t.plan(1);
 
 			var merchantId = merchants.create(merchantAttributes);
