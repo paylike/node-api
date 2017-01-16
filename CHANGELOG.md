@@ -5,6 +5,8 @@ log follows the format outlined at http://keepachangelog.com.
 
 ## Unreleased
 
+## 2.0.0 - 2017-02-01
+
 ### Added
 
 - `keepAlive` method on streams returned by `cursor.stream()`
