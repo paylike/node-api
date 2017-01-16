@@ -12,7 +12,7 @@
 		"files": "test/index.js"
 	},
 	"dependencies": {
-		"object-assign": "^4.0.1",
+		"object-assign": "^4.1.1",
 		"object-filter": "^1.0.2",
 		"date-to-object-id-hex": "^1.0.0",
 		"pull-fetch-iso": "^0.0.1",
