@@ -17,13 +17,13 @@ assign(Apps.prototype, {
 	findOne: function( cb ){
 		return this.service.get('/me')
 			.get('identity')
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	// https://github.com/paylike/api-docs#create-an-app
 	create: function( opts, cb ){
 		return this.service.post('/apps', opts)
 			.get('app')
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 })

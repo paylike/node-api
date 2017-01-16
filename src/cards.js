@@ -17,7 +17,7 @@ assign(Cards.prototype, {
 		})
 			.get('card')
 			.get('id')
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	// https://github.com/paylike/api-docs#fetch-a-card

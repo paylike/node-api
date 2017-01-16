@@ -22,7 +22,7 @@ assign(Transactions.prototype, {
 			})
 			.get('transaction')
 			.get('id')
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	// https://github.com/paylike/api-docs#fetch-all-transactions

@@ -24,19 +24,19 @@ assign(Merchants.prototype, {
 		return this.service.post('/merchants', opts)
 			.get('merchant')
 			.get('id')
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	// https://github.com/paylike/api-docs#update-a-merchant
 	update: function( merchantId, opts, cb ){
 		return this.service.put('/merchants/'+merchantId, opts)
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	//  https://github.com/paylike/api-docs#fetch-a-merchant
 	findOne: function( merchantId, cb ){
 		return this.service.get('/merchants/'+merchantId)
 			.get('merchant')
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 });

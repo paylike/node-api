@@ -17,7 +17,7 @@ assign(Transactions.prototype, {
 			descriptor: opts.descriptor,
 		})
 			.return()
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	// https://github.com/paylike/api-docs#refund-a-transaction
@@ -27,7 +27,7 @@ assign(Transactions.prototype, {
 			descriptor: opts.descriptor,
 		})
 			.return()
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	// https://github.com/paylike/api-docs#void-a-transaction
@@ -36,13 +36,13 @@ assign(Transactions.prototype, {
 			amount: opts.amount,
 		})
 			.return()
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	// https://github.com/paylike/api-docs#fetch-a-transaction
 	findOne: function( transactionId, cb ){
 		return this.service.get('/transactions/'+transactionId)
 			.get('transaction')
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 });

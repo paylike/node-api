@@ -13,13 +13,13 @@ assign(Users.prototype, {
 	add: function( merchantId, opts, cb ){
 		return this.service.post('/merchants/'+merchantId+'/users', opts)
 			.return()
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	// https://github.com/paylike/api-docs#revoke-user-from-a-merchant
 	revoke: function( merchantId, userId, cb ){
 		return this.service.delete('/merchants/'+merchantId+'/users/'+userId)
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	// https://github.com/paylike/api-docs#fetch-all-users-on-a-merchant

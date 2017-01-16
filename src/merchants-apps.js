@@ -13,14 +13,14 @@ assign(Apps.prototype, {
 	add: function( merchantId, opts, cb ){
 		return this.service.post('/merchants/'+merchantId+'/apps', opts)
 			.return()
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	// https://github.com/paylike/api-docs#revoke-app-from-a-merchant
 	revoke: function( merchantId, appId, cb ){
 		return this.service.delete('/merchants/'+merchantId+'/apps/'+appId)
 			.return()
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	// https://github.com/paylike/api-docs#fetch-all-apps-on-a-merchant

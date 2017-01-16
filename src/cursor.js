@@ -169,7 +169,7 @@ assign(Cursor.prototype, {
 			throw new Error('Calling cursor.toArray with "keep alive" would yield a never resolving promise');
 
 		return toPromise(this.source, true)
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 });
 

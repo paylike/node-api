@@ -64,22 +64,22 @@ assign(Service.prototype, {
 
 	get: function( path, query, cb ){
 		return toPromise(this.stream('GET', path, query))
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	post: function( path, body, cb ){
 		return toPromise.binary(this.stream('POST', path, null, body))
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	put: function( path, body, cb ){
 		return toPromise(this.stream('PUT', path, null, body), false)
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	delete: function( path, query, cb ){
 		return toPromise.binary(this.stream('DELETE', path, query), false)
-			.nodeify(cb);
+			.asCallback(cb);
 	},
 
 	stream: function( verb, path, query, body ){
