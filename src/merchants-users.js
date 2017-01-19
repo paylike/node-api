@@ -24,7 +24,7 @@ assign(Users.prototype, {
 	},
 
 	// https://github.com/paylike/api-docs#fetch-all-users-on-a-merchant
-	find: function( merchantId, cb ){
+	find: function( merchantId ){
 		return new this.service.Cursor(this.service, '/merchants/'+merchantId+'/users');
 	},
 });
