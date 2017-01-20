@@ -5,6 +5,10 @@ log follows the format outlined at http://keepachangelog.com.
 
 ## Unreleased
 
+### Added
+
+- `cards.findOne` method for retrieving a single card
+
 ### Removed
 
 - `cursor.skip`

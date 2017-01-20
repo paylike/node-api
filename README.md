@@ -69,6 +69,7 @@ transactions.findOne(transactionId) -> Promise(transaction)
 
 
 cards.create(merchantId, opts) -> Promise(cardId)
+cards.findOne(cardId) -> Promise(card)
 ```
 
 A webshop would typically need only `capture`, `refund` and `void`. Some might

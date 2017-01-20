@@ -466,4 +466,35 @@ test('cards', function( t ){
 				t.fail();
 			});
 	});
+
+	t.test('find one', function( t ){
+		t.plan(1);
+
+		var cardId = cards.create(merchantId, {
+			transactionId: transactionId,
+		});
+
+		var fetched = cardId
+			.then(function( id ){
+				return cards.findOne(id);
+			});
+
+		Promise
+			.join(cardId, fetched)
+			.spread(function( id, fetched ){
+				t.deepEqual(fetched, {
+					id: id,
+					merchantId: '55006bdfe0308c4cbfdbd0e1',
+					bin: '410000',
+					last4: '0000',
+					scheme: 'visa',
+					expiry: '2066-08-31T23:59:59.999Z',
+					notes: null,
+					deleted: null,
+				}, 'returned card');
+			})
+			.catch(function(){
+				t.fail();
+			});
+	});
 });

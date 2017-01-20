@@ -19,4 +19,11 @@ assign(Cards.prototype, {
 			.get('id')
 			.nodeify(cb);
 	},
+
+	// https://github.com/paylike/api-docs#fetch-a-card
+	findOne: function( cardId, cb ){
+		return this.service.request('GET', '/cards/'+cardId)
+			.get('card')
+			.nodeify(cb);
+	},
 })
