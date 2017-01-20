@@ -41,7 +41,7 @@ apps.create(opts) -> Promise(app)
 apps.findOne() -> Promise(app)
 
 // list app's merchants
-apps.merchants.find(appId) -> Cursor
+apps.merchants.find(appId) -> Cursor(users)
 
 
 merchants.create(opts) -> Promise(merchantId)
@@ -50,16 +50,16 @@ merchants.findOne(merchantId) -> Promise(merchant)
 
 merchants.users.add(merchantId, opts) -> Promise
 merchants.users.revoke(merchantId, userId) -> Promise
-merchants.users.find(merchantId) -> Promise(users)
+merchants.users.find(merchantId) -> Cursor(users)
 
 merchants.apps.add(merchantId, opts) -> Promise
 merchants.apps.revoke(merchantId, appId) -> Promise
-merchants.apps.find(merchantId) -> Promise(apps)
+merchants.apps.find(merchantId) -> Cursor(apps)
 
-merchants.lines.find(merchantId) -> Promise(lines)
+merchants.lines.find(merchantId) -> Cursor(lines)
 
 merchants.transactions.create(merchantId, opts) -> Promise(transactionId)
-merchants.transactions.find(merchantId) -> Cursor
+merchants.transactions.find(merchantId) -> Cursor(transactions)
 
 
 transactions.capture(transactionId, opts) -> Promise
