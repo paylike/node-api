@@ -5,6 +5,8 @@ log follows the format outlined at http://keepachangelog.com.
 
 ## Unreleased
 
+## 1.1.0 - 2017-01-20
+
 ### Added
 
 - `cards.findOne` method for retrieving a single card
