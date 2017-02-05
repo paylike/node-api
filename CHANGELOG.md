@@ -9,7 +9,7 @@ log follows the format outlined at http://keepachangelog.com.
 
 ### Added
 
-- `keepAlive` method on streams returned by `cursor.stream()`
+- `keepAlive` method on cursors
 
 	Keeps the stream open instead of closing it when there is no more data.
 	Polls for new data every five seconds (configurable).
