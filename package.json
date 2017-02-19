@@ -15,7 +15,7 @@
 		"object-assign": "^4.1.1",
 		"object-filter": "^1.0.2",
 		"date-to-object-id-hex": "^1.0.0",
-		"pull-fetch-iso": "^0.0.1",
+		"pull-fetch-iso": "^0.0.2",
 		"pull-stream": "^3.5.0",
 		"pull-to-promise": "^0.0.3"
 	},
