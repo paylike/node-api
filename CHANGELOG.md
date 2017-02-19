@@ -5,6 +5,8 @@ log follows the format outlined at http://keepachangelog.com.
 
 ## Unreleased
 
+## 2.0.1 - 2017-02-20
+
 ### Others
 
 - Upgraded dependencies (`pull-fetch-iso`)
