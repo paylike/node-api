@@ -56,7 +56,7 @@ assign(Paylike.prototype, errors, {
 function Service( opts ){
 	this.url = opts.url || 'https://api.paylike.io';
 	this.key = opts.key;
-	this.agent = opts.agent || 'Node 2.0.0';
+	this.agent = opts.agent || 'Node 2.0.2';
 }
 
 assign(Service.prototype, {

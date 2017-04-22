@@ -5,6 +5,8 @@ log follows the format outlined at http://keepachangelog.com.
 
 ## Unreleased
 
+## 2.0.2 - 2017-04-22
+
 ### Changed
 
 - Fix bug rendering `cards.findOne` useless
