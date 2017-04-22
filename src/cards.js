@@ -22,7 +22,7 @@ assign(Cards.prototype, {
 
 	// https://github.com/paylike/api-docs#fetch-a-card
 	findOne: function( cardId, cb ){
-		return this.service.request('GET', '/cards/'+cardId)
+		return this.service.get('/cards/'+cardId)
 			.get('card')
 			.nodeify(cb);
 	},
