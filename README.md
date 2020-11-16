@@ -39,7 +39,7 @@ apps.create(opts) -> Promise(app)
 apps.findOne() -> Promise(app)
 
 // list app's merchants
-apps.merchants.find(appId) -> Cursor(users)
+apps.merchants.find(appId) -> Cursor(merchants)
 
 
 merchants.create(opts) -> Promise(merchantId)
