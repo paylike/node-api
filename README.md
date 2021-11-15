@@ -139,7 +139,7 @@ The rationale for using `after`/`before` as opposed to `skip` is to achieve
 stable lists and reliable data synchronization.
 
 ```js
-var cursor = paylike.transactions.find(merchantId);
+var cursor = paylike.merchants.transactions.find(merchantId);
 
 // get a promise for an array of the last 5 transactions
 cursor.limit(5).toArray();
@@ -149,13 +149,13 @@ var pull = require('pull-stream');
 
 // print all transactions
 pull(
-	paylike.transactions.find(merchantId),
+	paylike.merchants.transactions.find(merchantId),
 	pull.log()
 )
 
 // live stream transaction amounts as they occur
 pull(
-	paylike.transactions.find(merchantId)
+	paylike.merchants.transactions.find(merchantId)
 		.since(new Date())
 		.keepAlive(),
 	pull.map(t => t.currency+' '+t.amount),
@@ -166,7 +166,7 @@ pull(
 // stream)
 var toStream = require('pull-stream-to-stream');
 
-toStream(paylike.transactions.find(merchantId))
+toStream(paylike.merchants.transactions.find(merchantId))
 	.pipe(JSONStream.stringify())
 	.pipe(response);
 ```
